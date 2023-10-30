@@ -9,7 +9,7 @@
   "scripts": {
     "test": "npm run test -w packages/client -w packages/server",
     "start:dev:client": "npm run start --prefix ./packages/client",
-    "start:dev:server": "npm run start --prefix ./packages/server",
+    "start:dev:server": "npm run start:dev --prefix ./packages/server",
     "start:dev": "concurrently npm:start:dev:client npm:start:dev:server",
     "build:client": "npm run build --prefix ./packages/client",
     "build:server": "npm run build --prefix ./packages/server",
