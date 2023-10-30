@@ -1,10 +1,26 @@
 {
-  "name": "packages",
+  "name": "deliverx",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "workspaces": [
+    "packages/client",
+    "packages/server"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test -w packages/client -w packages/server",
+    "start:dev:client": "npm run start --prefix ./packages/client",
+    "start:dev:server": "npm run start --prefix ./packages/server",
+    "start:dev": "concurrently npm:start:dev:client npm:start:dev:server",
+    "build:client": "npm run build --prefix ./packages/client",
+    "build:server": "npm run build --prefix ./packages/server",
+    "build": "npm run build:client && npm run build:server",
+    "eslint": "eslint --ignore-path .gitignore .",
+    "prettier": "prettier -c --ignore-path .gitignore .",
+    "eslint:fix": "eslint --fix --ignore-path .gitignore .",
+    "prettier:fix": "prettier --write --ignore-path .gitignore .",
+    "lint": "npm run eslint && npm run prettier",
+    "lint:fix": "npm run eslint:fix && npm run prettier:fix",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "",
@@ -12,9 +28,11 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.9.0",
     "@typescript-eslint/parser": "^6.9.0",
+    "concurrently": "^8.2.2",
     "eslint": "^8.52.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
+    "husky": "^8.0.3",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   }
