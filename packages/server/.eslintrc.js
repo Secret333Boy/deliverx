@@ -1,3 +1,4 @@
+/* eslint-env node, jest */
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -8,6 +9,7 @@ module.exports = {
   env: {
     node: true,
     jest: true,
+    browser: false,
   },
   ignorePatterns: ['.eslintrc.js'],
   rules: {
