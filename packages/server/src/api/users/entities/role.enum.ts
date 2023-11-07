@@ -1,0 +1,7 @@
+export enum Role {
+  USER,
+  DEPARTMENT_WORKER,
+  SORT_CENTER_WORKER,
+  DRIVER,
+  ADMIN,
+}
