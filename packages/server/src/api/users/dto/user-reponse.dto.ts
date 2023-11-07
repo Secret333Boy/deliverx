@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { Role } from '../entities/role.enum';
 
-export default class UserReponseDto {
+export class UserReponseDto {
   constructor(partial: Partial<UserReponseDto>) {
     Object.assign(this, partial);
   }

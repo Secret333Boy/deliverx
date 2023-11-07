@@ -17,8 +17,4 @@ export default class RegisterDto {
   @IsNotEmpty()
   @Length(8, 63)
   public password: string;
-
-  @IsString()
-  @IsNotEmpty()
-  public verifyPassword: string;
 }
