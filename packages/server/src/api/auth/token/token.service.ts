@@ -3,9 +3,9 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { instanceToPlain } from 'class-transformer';
 import { Repository } from 'typeorm';
-import { TokenStore } from './entities/token.entity';
+import { TokenStore } from './entities/token-store.entity';
 import { User } from 'src/api/users/entities/user.entity';
-import UserReponseDto from 'src/api/users/dto/user-reponse.dto';
+import { UserReponseDto } from 'src/api/users/dto/user-reponse.dto';
 
 export type Tokens = {
   accessToken: string;

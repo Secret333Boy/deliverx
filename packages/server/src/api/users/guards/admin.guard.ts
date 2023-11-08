@@ -3,7 +3,7 @@ import { Role } from '../entities/role.enum';
 import { RoleGuard } from './role.guard';
 
 @Injectable()
-export class UserGuard extends RoleGuard {
+export class AdminGuard extends RoleGuard {
   constructor() {
     super([Role.ADMIN]);
   }

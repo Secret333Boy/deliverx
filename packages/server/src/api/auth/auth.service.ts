@@ -15,8 +15,8 @@ import { Role } from '../users/entities/role.enum';
 
 @Injectable()
 export class AuthService {
-  private CONFLICT_MESSAGE = 'User with this email already exists';
-  private PASSWORD_NOT_VALID_MESSAGE = 'Password is not valid';
+  private readonly CONFLICT_MESSAGE = 'User with this email already exists';
+  private readonly PASSWORD_NOT_VALID_MESSAGE = 'Password is not valid';
 
   constructor(
     @Inject(UsersService) private usersService: UsersService,
