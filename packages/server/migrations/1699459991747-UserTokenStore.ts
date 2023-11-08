@@ -4,6 +4,7 @@ export class UserTokenStore1699459991747 implements MigrationInterface {
   name = 'UserTokenStore1699459991747';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
     await queryRunner.query(
       `CREATE TYPE "public"."user_role_enum" AS ENUM('0', '1', '2', '3', '4')`,
     );
@@ -25,5 +26,6 @@ export class UserTokenStore1699459991747 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "token_store"`);
     await queryRunner.query(`DROP TABLE "user"`);
     await queryRunner.query(`DROP TYPE "public"."user_role_enum"`);
+    await queryRunner.query(`CREATE EXTENSION "uuid-ossp"`);
   }
 }
