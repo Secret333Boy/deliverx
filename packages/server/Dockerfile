@@ -1,11 +1,13 @@
-FROM node:20-alpine as builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json .
-RUN npm i
-COPY . .
+COPY tsconfig*.json .
+COPY ./src ./src
+RUN npm i --ignore-scripts
 RUN npm run build
+USER nonroot
 
-FROM node:20-alpine as production
+FROM node:20-alpine AS production
 ENV NODE_ENV=production
 ENV PORT=3001
 WORKDIR /app

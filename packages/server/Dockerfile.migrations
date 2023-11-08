@@ -1,7 +1,7 @@
 FROM node:20-alpine
 WORKDIR /app
 RUN npm init -y
-RUN npm i typeorm ts-node pg
+RUN npm i --ignore-scripts typeorm ts-node pg
 RUN npm pkg set scripts.typeorm="typeorm-ts-node-commonjs -d ./data-source.ts"
 RUN npm pkg set scripts.typeorm:run="npm run typeorm migration:run"
 COPY ./data-source.ts ./data-source.ts
