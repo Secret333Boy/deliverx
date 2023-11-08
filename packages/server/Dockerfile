@@ -5,7 +5,6 @@ COPY tsconfig*.json .
 COPY ./src ./src
 RUN npm i --ignore-scripts
 RUN npm run build
-USER nonroot
 
 FROM node:20-alpine AS production
 ENV NODE_ENV=production

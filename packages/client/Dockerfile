@@ -6,7 +6,6 @@ COPY ./package*.json .
 COPY ./tsconfig.json .
 RUN npm i --ignore-scripts
 RUN npm run build
-USER nonroot
 
 FROM nginx:stable-alpine AS production
 COPY --from=builder /app/build /usr/share/nginx/html
