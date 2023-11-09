@@ -1,0 +1,44 @@
+services:
+  client:
+    build: ./packages/client
+    ports:
+      - 3000:80
+    environment:
+      - NODE_ENV
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD
+    expose:
+      - '5432'
+  db-migrations:
+    build:
+      context: ./packages/server
+      dockerfile: Dockerfile.migrations
+    environment:
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DATABASE
+    depends_on:
+      db:
+        condition: service_started
+  server:
+    build: ./packages/server
+    ports:
+      - 3001:3001
+    environment:
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DATABASE
+      - PORT
+      - JWT_ACCESS_SECRET
+      - JWT_REFRESH_SECRET
+      - FRONTEND_URL
+      - ROOT_ADMIN_PASSWORD
+    depends_on:
+      db-migrations:
+        condition: service_completed_successfully
