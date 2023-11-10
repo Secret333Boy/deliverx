@@ -36,7 +36,7 @@ export class ConfigService {
       username: this.getValue('POSTGRES_USER'),
       password: this.getValue('POSTGRES_PASSWORD'),
       database: this.getValue('POSTGRES_DATABASE'),
-      ssl: this.isProduction(),
+      ssl: process.env.POSTGRES_SSL === 'true',
       entities: [__dirname + '/../**/*.entity.js'],
       synchronize: false,
     };
