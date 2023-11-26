@@ -1,4 +1,5 @@
 import { Place } from 'src/api/places/entities/place.entity';
+import { User } from 'src/api/users/entities/user.entity';
 import {
   Column,
   Entity,
@@ -11,6 +12,10 @@ import {
 export class Invoice {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => User)
+  @JoinColumn()
+  creator: User;
 
   @Column()
   description: string;
