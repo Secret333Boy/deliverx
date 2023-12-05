@@ -1,5 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Role } from './role.enum';
+import { Place } from 'src/api/places/entities/place.entity';
 
 @Entity()
 export class User {
@@ -20,4 +27,8 @@ export class User {
 
   @Column('enum', { enum: Role })
   role: Role;
+
+  @OneToOne(() => Place, { nullable: true })
+  @JoinColumn()
+  place?: Place;
 }

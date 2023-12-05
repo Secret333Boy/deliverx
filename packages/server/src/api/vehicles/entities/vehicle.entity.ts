@@ -8,5 +8,5 @@ export class Vehicle {
 
   @OneToOne(() => User)
   @JoinColumn()
-  asssignedDriver: User;
+  driver: User;
 }
