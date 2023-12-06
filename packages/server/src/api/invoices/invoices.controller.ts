@@ -29,6 +29,36 @@ export class InvoicesController {
     return this.invoicesService.getInvoices(user, take || 100, skip || 0);
   }
 
+  @Get('/inplace')
+  @UseGuards(JwtAuthGuard)
+  public getInplaceInvoices(
+    @UserData() user: User,
+    @Query('take', ParseIntPipe) take?: number,
+    @Query('skip', ParseIntPipe) skip?: number,
+  ) {
+    return this.invoicesService.getInplaceInvoices(
+      user,
+      take || 100,
+      skip || 0,
+    );
+  }
+
+  @Get('/inplace/:id')
+  @UseGuards(JwtAuthGuard)
+  public getPlaceInvoices(
+    @UserData() user: User,
+    @Param('id', ParseIntPipe) id?: number,
+    @Query('take', ParseIntPipe) take?: number,
+    @Query('skip', ParseIntPipe) skip?: number,
+  ) {
+    return this.invoicesService.getPlaceInvoices(
+      user,
+      id,
+      take || 100,
+      skip || 0,
+    );
+  }
+
   @Get('/:id')
   @UseGuards(JwtAuthGuard)
   public getInvoice(

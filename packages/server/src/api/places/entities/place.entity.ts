@@ -4,7 +4,7 @@ import { PlaceType } from './place-type.enum';
 @Entity()
 export class Place {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column()
   name: string;
