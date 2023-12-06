@@ -14,6 +14,7 @@ import { UserReponseDto } from './dto/user-reponse.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from './entities/role.enum';
 import { PatchWorkerDto } from './dto/patch-worker.dto';
+import { Place } from '../places/entities/place.entity';
 
 @Injectable()
 export class UsersService {
@@ -32,10 +33,12 @@ export class UsersService {
 
   public async initRootAdminAccount() {
     try {
-      const hash = bcrypt.hashSync(
-        process.env.ROOT_ADMIN_PASSWORD || 'admin',
-        bcrypt.genSaltSync(),
-      );
+      const adminPassword = process.env.ROOT_ADMIN_PASSWORD || 'adminadmin';
+
+      if (adminPassword.length < 8)
+        throw new Error('Root admin password length is less than 8');
+
+      const hash = bcrypt.hashSync(adminPassword, bcrypt.genSaltSync());
 
       await this.usersRepository.upsert(
         {
@@ -72,6 +75,8 @@ export class UsersService {
 
     const totalPages = Math.ceil(count / take);
 
+    workers.forEach((worker) => delete worker.hash);
+
     return { totalPages, workers };
   }
 
@@ -83,6 +88,8 @@ export class UsersService {
 
     if (!worker)
       throw new NotFoundException(this.WORKER_NOT_FOUND_EXCEPTION_MESSAGE);
+
+    delete worker.hash;
 
     return worker;
   }
@@ -145,5 +152,13 @@ export class UsersService {
     await this.findOne(id);
 
     await this.usersRepository.delete({ id });
+  }
+  public async getWorkerPlace(id: string): Promise<Place | null> {
+    const { place } = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['place'],
+    });
+
+    return place;
   }
 }
