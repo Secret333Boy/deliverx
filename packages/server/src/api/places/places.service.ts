@@ -11,6 +11,10 @@ export class PlacesService {
     @InjectRepository(Place) private placeRepository: Repository<Place>,
   ) {}
 
+  public getPlaces() {
+    return this.placeRepository.find();
+  }
+
   public async getPlace(id: number) {
     const place = await this.placeRepository.findOneBy({ id });
 

@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { EventType } from './event-type.enum';
 import { Transition } from 'src/api/transitions/entities/transition.entity';
+import { Place } from 'src/api/places/entities/place.entity';
 
 @Entity()
 export class Event {
@@ -24,9 +25,13 @@ export class Event {
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   time: Date;
 
-  @ManyToOne(() => Transition, { nullable: true })
+  @ManyToOne(() => Place, { nullable: true })
   @JoinColumn()
-  transition?: Transition;
+  source?: Place;
+
+  @ManyToOne(() => Place, { nullable: true })
+  @JoinColumn()
+  target?: Place;
 
   @Column({ default: false })
   processed: boolean;
