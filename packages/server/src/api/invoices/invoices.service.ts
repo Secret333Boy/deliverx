@@ -17,6 +17,7 @@ import { PlacesService } from '../places/places.service';
 import { FlowEventEmitter } from '../events/flow-event.emitter';
 import { EventType } from '../events/entities/event-type.enum';
 import { InvoiceEventProcessor } from './invoice-event.processor';
+import { EventsService } from '../events/events.service';
 
 @Injectable()
 export class InvoicesService {
@@ -31,6 +32,7 @@ export class InvoicesService {
     @Inject(UsersService) private usersService: UsersService,
     @Inject(PlacesService) private placesService: PlacesService,
     @Inject(FlowEventEmitter) private flowEventEmitter: FlowEventEmitter,
+    @Inject(EventsService) private eventsService: EventsService,
     @Inject(InvoiceEventProcessor)
     private invoiceEventProcessor: InvoiceEventProcessor,
   ) {
@@ -111,9 +113,14 @@ export class InvoicesService {
   }
 
   public async createInvoice(user: User, createInvoiceDto: CreateInvoiceDto) {
-    await this.invoiceRepository.save({
+    const invoice = await this.invoiceRepository.save({
       ...createInvoiceDto,
       creator: { id: user.id },
+    });
+
+    this.eventsService.emitEvent(user, {
+      invoiceId: invoice.id,
+      type: EventType.CREATED,
     });
   }
 
