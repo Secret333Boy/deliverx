@@ -11,6 +11,8 @@ export class EventEmitter<E extends string = string, V = undefined> {
     }
 
     eventHandlers.push(handler);
+
+    return this;
   }
 
   public async emit(event: E, data: V) {
