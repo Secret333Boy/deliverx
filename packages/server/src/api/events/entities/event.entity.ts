@@ -21,10 +21,16 @@ export class Event {
   @Column('enum', { enum: EventType })
   type: EventType;
 
-  @Column({ default: new Date() })
+  @Column({ default: () => 'CURRENT_TIMESTAMP' })
   time: Date;
 
-  @ManyToOne(() => Transition)
+  @ManyToOne(() => Transition, { nullable: true })
   @JoinColumn()
   transition?: Transition;
+
+  @Column({ default: false })
+  processed: boolean;
+
+  @Column({ default: false })
+  failed: boolean;
 }

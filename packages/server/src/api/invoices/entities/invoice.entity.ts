@@ -43,4 +43,7 @@ export class Invoice {
   @ManyToOne(() => Place, { nullable: true })
   @JoinColumn()
   currentPlace: Place;
+
+  @Column({ default: false })
+  finished: boolean;
 }

@@ -3,8 +3,13 @@ import { Role } from '../entities/role.enum';
 import { RoleGuard } from './role.guard';
 
 @Injectable()
-export class UserGuard extends RoleGuard {
+export class WorkerGuard extends RoleGuard {
   constructor() {
-    super([Role.DEPARTMENT_WORKER, Role.SORT_CENTER_WORKER, Role.DRIVER]);
+    super([
+      Role.DEPARTMENT_WORKER,
+      Role.SORT_CENTER_WORKER,
+      Role.DRIVER,
+      Role.ADMIN,
+    ]);
   }
 }
