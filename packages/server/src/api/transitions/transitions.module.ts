@@ -7,5 +7,6 @@ import { Transition } from './entities/transition.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Transition]), PlacesModule],
   providers: [TransitionsService],
+  exports: [TransitionsService],
 })
 export class TransitionsModule {}

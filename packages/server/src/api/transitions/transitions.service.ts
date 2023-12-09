@@ -18,6 +18,10 @@ export class TransitionsService {
     this.updateTransitions();
   }
 
+  public getAllTransitions() {
+    return this.transitionRepository.find();
+  }
+
   public async updateTransitions() {
     this.logger.log('Transtions update process started');
     await this.transitionRepository.delete({});
