@@ -1,6 +1,6 @@
 export enum EventType {
-  CREATED,
-  GOT,
-  TRANSITIONED,
-  GIVEN,
+  CREATED = 'created',
+  GOT = 'got',
+  TRANSITIONED = 'transitioned',
+  GIVEN = 'given',
 }
