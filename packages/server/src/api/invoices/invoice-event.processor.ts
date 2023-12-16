@@ -3,9 +3,10 @@ import { FlowEventPayload } from '../events/flow-event.emitter';
 import { Invoice } from './entities/invoice.entity';
 import { EventType } from '../events/entities/event-type.enum';
 import { User } from '../users/entities/user.entity';
+import { FlowEventProcessor } from '../events/flow-event-processor.interface';
 
 @Injectable()
-export class InvoiceEventProcessor {
+export class InvoiceEventProcessor implements FlowEventProcessor {
   private readonly INVOICE_NOT_FOUND_EXCEPTION_MESSAGE = `Invoice not found`;
   private readonly WORKER_INSUFICIANT_PLACE_EXCEPTION_MESSAGE = `Worker has different place from needed one by event`;
   private readonly INVOICE_ALREADY_HAS_PLACE_EXCEPTION_MESSAGE = `Invoice already has current place. Tried to perform ${EventType.GOT} event on invoice with current place set`;
