@@ -20,6 +20,6 @@ export class Transition {
   @JoinColumn()
   targetPlace: Place;
 
-  @Column()
+  @Column('float')
   cost: number;
 }
