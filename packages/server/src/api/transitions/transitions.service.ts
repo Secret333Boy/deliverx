@@ -26,7 +26,7 @@ export class TransitionsService {
     this.logger.log('Transtions update process started');
     await this.transitionRepository.delete({});
 
-    const places = await this.placesService.getPlaces();
+    const places = await this.placesService.getAllPlaces();
 
     for (const place1 of places) {
       if (place1.type === PlaceType.DEPARTMENT) {

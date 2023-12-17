@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Place } from './entities/place.entity';
 import { Repository } from 'typeorm';
+import { PlaceType } from './entities/place-type.enum';
 
 @Injectable()
 export class PlacesService {
@@ -11,7 +12,7 @@ export class PlacesService {
     @InjectRepository(Place) private placeRepository: Repository<Place>,
   ) {}
 
-  public getPlaces() {
+  public getAllPlaces() {
     return this.placeRepository.find();
   }
 
@@ -22,5 +23,17 @@ export class PlacesService {
       throw new NotFoundException(this.PLACE_NOT_FOUND_EXCEPTION_MESSAGE);
 
     return place;
+  }
+
+  public getDepartments(take = 100, skip = 0) {
+    if (take > 100) take = 100;
+
+    console.log(take);
+
+    return this.placeRepository.find({
+      where: { type: PlaceType.DEPARTMENT },
+      take,
+      skip,
+    });
   }
 }
