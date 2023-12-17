@@ -14,6 +14,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserData } from '../users/decorators/user-data.decorator';
 import { User } from '../users/entities/user.entity';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { AdminGuard } from '../users/guards/admin.guard';
 
 @Controller('invoices')
 export class InvoicesController {
@@ -23,40 +24,34 @@ export class InvoicesController {
   @UseGuards(JwtAuthGuard)
   public getInvoices(
     @UserData() user: User,
-    @Query('take', ParseIntPipe) take?: number,
-    @Query('skip', ParseIntPipe) skip?: number,
+    @Query('take') take?: string,
+    @Query('skip') skip?: string,
   ) {
-    return this.invoicesService.getInvoices(user, take || 100, skip || 0);
+    return this.invoicesService.getInvoices(user, +take || 100, +skip || 0);
   }
 
   @Get('/inplace')
   @UseGuards(JwtAuthGuard)
   public getInplaceInvoices(
     @UserData() user: User,
-    @Query('take', ParseIntPipe) take?: number,
-    @Query('skip', ParseIntPipe) skip?: number,
+    @Query('take') take?: string,
+    @Query('skip') skip?: string,
   ) {
     return this.invoicesService.getInplaceInvoices(
       user,
-      take || 100,
-      skip || 0,
+      +take || 100,
+      +skip || 0,
     );
   }
 
   @Get('/inplace/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   public getPlaceInvoices(
-    @UserData() user: User,
     @Param('id', ParseIntPipe) id?: number,
-    @Query('take', ParseIntPipe) take?: number,
-    @Query('skip', ParseIntPipe) skip?: number,
+    @Query('take') take?: string,
+    @Query('skip') skip?: string,
   ) {
-    return this.invoicesService.getPlaceInvoices(
-      user,
-      id,
-      take || 100,
-      skip || 0,
-    );
+    return this.invoicesService.getPlaceInvoices(id, +take || 100, +skip || 0);
   }
 
   @Get('/:id')
@@ -75,5 +70,28 @@ export class InvoicesController {
     @Body() createInvoiceDto: CreateInvoiceDto,
   ) {
     return this.invoicesService.createInvoice(user, createInvoiceDto);
+  }
+
+  @Get('/tracked')
+  @UseGuards(JwtAuthGuard)
+  public getTrackedInvoices(
+    @UserData() user: User,
+    @Query('take') take?: string,
+    @Query('skip') skip?: string,
+  ) {
+    return this.invoicesService.getTrackedInvoices(
+      user,
+      +take || 100,
+      +skip || 0,
+    );
+  }
+
+  @Post('/track/:id')
+  @UseGuards(JwtAuthGuard)
+  public trackInvoice(
+    @UserData() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.invoicesService.trackInvoice(user, id);
   }
 }

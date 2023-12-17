@@ -22,7 +22,9 @@ export class TokenService {
     private tokenRepository: Repository<TokenStore>,
   ) {}
 
-  public async generateTokens(user: User): Promise<Tokens> {
+  public async generateTokens(
+    user: Omit<User, 'trackedInvoices' | 'place'>,
+  ): Promise<Tokens> {
     const data = instanceToPlain(new UserReponseDto(user));
     const accessToken = this.jwtService.sign(data, {
       secret: process.env.JWT_ACCESS_SECRET,

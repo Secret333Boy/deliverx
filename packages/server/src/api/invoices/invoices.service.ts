@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from './entities/invoice.entity';
-import { QueryRunner, Repository } from 'typeorm';
+import { In, QueryRunner, Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../users/entities/role.enum';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
@@ -18,10 +18,13 @@ import { FlowEventEmitter } from '../events/flow-event.emitter';
 import { EventType } from '../events/entities/event-type.enum';
 import { InvoiceEventProcessor } from './invoice-event.processor';
 import { EventsService } from '../events/events.service';
+import { UserInvoice } from './entities/user-invoice.entity';
 
 @Injectable()
 export class InvoicesService {
   private readonly INVOICE_NOT_FOUND_EXCEPTION_MESSAGE = 'Invoice not found';
+  private readonly INVOICE_FORBIDDEN_EXCEPTION_MESSAGE =
+    'You are forbidden to access this invoice';
   private readonly INVOICE_NOT_A_WORKER_FORBIDDEN_EXCEPTION_MESSAGE =
     'Not a worker';
 
@@ -29,6 +32,8 @@ export class InvoicesService {
 
   constructor(
     @InjectRepository(Invoice) private invoiceRepository: Repository<Invoice>,
+    @InjectRepository(UserInvoice)
+    private userInvoiceRepository: Repository<UserInvoice>,
     @Inject(UsersService) private usersService: UsersService,
     @Inject(PlacesService) private placesService: PlacesService,
     @Inject(FlowEventEmitter) private flowEventEmitter: FlowEventEmitter,
@@ -79,15 +84,8 @@ export class InvoicesService {
     });
   }
 
-  public async getPlaceInvoices(user: User, id: number, take = 100, skip = 0) {
+  public async getPlaceInvoices(id: number, take = 100, skip = 0) {
     if (take > 100) take = 100;
-
-    const isWorker = user.role !== Role.USER;
-
-    if (!isWorker)
-      throw new ForbiddenException(
-        this.INVOICE_NOT_A_WORKER_FORBIDDEN_EXCEPTION_MESSAGE,
-      );
 
     const place = await this.placesService.getPlace(id);
 
@@ -99,16 +97,26 @@ export class InvoicesService {
   }
 
   public async getInvoice(user: User, id: string) {
-    const isWorker = user.role !== Role.USER;
-
-    const invoice = await this.invoiceRepository.findOneBy({
-      id,
-      ...(isWorker ? {} : { creator: { id: user.id } }),
+    const invoice = await this.invoiceRepository.findOne({
+      where: {
+        id,
+      },
+      relations: ['creator'],
     });
 
     if (!invoice)
       throw new NotFoundException(this.INVOICE_NOT_FOUND_EXCEPTION_MESSAGE);
 
+    const isWorker = user.role !== Role.USER;
+
+    if (
+      !isWorker &&
+      invoice.creator.id !== user.id &&
+      invoice.receiverEmail !== user.email
+    )
+      throw new ForbiddenException(this.INVOICE_FORBIDDEN_EXCEPTION_MESSAGE);
+
+    delete invoice.creator;
     return invoice;
   }
 
@@ -142,5 +150,30 @@ export class InvoicesService {
       id: invoice.id,
       currentPlace: { id: place.id },
     });
+  }
+
+  public async trackInvoice(user: User, id: string) {
+    const invoice = await this.getInvoice(user, id);
+
+    await this.userInvoiceRepository.save({
+      userId: user.id,
+      invoiceId: invoice.id,
+    });
+  }
+
+  public async getTrackedInvoices(user: User, take = 100, skip = 0) {
+    if (take > 100) take = 100;
+
+    const [invoiceIds, count] = await this.userInvoiceRepository.findAndCount({
+      where: { userId: user.id },
+      take,
+      skip,
+    });
+
+    const invoices = this.invoiceRepository.findBy({ id: In(invoiceIds) });
+
+    const totalPages = Math.ceil(count / take);
+
+    return { invoices, totalPages };
   }
 }

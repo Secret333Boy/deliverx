@@ -28,8 +28,6 @@ export class PlacesService {
   public getDepartments(take = 100, skip = 0) {
     if (take > 100) take = 100;
 
-    console.log(take);
-
     return this.placeRepository.find({
       where: { type: PlaceType.DEPARTMENT },
       take,
