@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -54,6 +55,20 @@ export class InvoicesController {
     return this.invoicesService.getPlaceInvoices(id, +take || 100, +skip || 0);
   }
 
+  @Get('/tracked')
+  @UseGuards(JwtAuthGuard)
+  public getTrackedInvoices(
+    @UserData() user: User,
+    @Query('take') take?: string,
+    @Query('skip') skip?: string,
+  ) {
+    return this.invoicesService.getTrackedInvoices(
+      user,
+      +take || 100,
+      +skip || 0,
+    );
+  }
+
   @Get('/:id')
   @UseGuards(JwtAuthGuard)
   public getInvoice(
@@ -72,20 +87,6 @@ export class InvoicesController {
     return this.invoicesService.createInvoice(user, createInvoiceDto);
   }
 
-  @Get('/tracked')
-  @UseGuards(JwtAuthGuard)
-  public getTrackedInvoices(
-    @UserData() user: User,
-    @Query('take') take?: string,
-    @Query('skip') skip?: string,
-  ) {
-    return this.invoicesService.getTrackedInvoices(
-      user,
-      +take || 100,
-      +skip || 0,
-    );
-  }
-
   @Post('/track/:id')
   @UseGuards(JwtAuthGuard)
   public trackInvoice(
@@ -93,5 +94,14 @@ export class InvoicesController {
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.invoicesService.trackInvoice(user, id);
+  }
+
+  @Delete('/untrack/:id')
+  @UseGuards(JwtAuthGuard)
+  public untrackInvoice(
+    @UserData() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.invoicesService.untrackInvoice(user, id);
   }
 }

@@ -5,6 +5,7 @@ import {
   Length,
   IsEnum,
   NotEquals,
+  IsNumber,
 } from 'class-validator';
 import { Role } from '../entities/role.enum';
 
@@ -31,4 +32,8 @@ export class PatchWorkerDto {
   @IsEnum(Role)
   @NotEquals(Role.USER)
   role?: Exclude<Role, Role.USER>;
+
+  @IsOptional()
+  @IsNumber()
+  placeId?: number;
 }

@@ -53,14 +53,18 @@ export class InvoicesService {
     this.logger.debug(`Listening to flow events`);
   }
 
-  public getInvoices(user: User, take = 100, skip = 0) {
+  public async getInvoices(user: User, take = 100, skip = 0) {
     if (take > 100) take = 100;
 
-    return this.invoiceRepository.find({
+    const [invoices, count] = await this.invoiceRepository.findAndCount({
       where: { creator: { id: user.id } },
       take,
       skip,
     });
+
+    const totalPages = Math.ceil(count / take);
+
+    return { invoices, totalPages };
   }
 
   public async getInplaceInvoices(user: User, take = 100, skip = 0) {
@@ -75,13 +79,17 @@ export class InvoicesService {
 
     const currentPlace = await this.usersService.getWorkerPlace(user.id);
 
-    if (!currentPlace) return [];
+    if (!currentPlace) return { invoices: [], totalPages: 1 };
 
-    return this.invoiceRepository.find({
+    const [invoices, count] = await this.invoiceRepository.findAndCount({
       where: { currentPlace: { id: currentPlace.id } },
       take,
       skip,
     });
+
+    const totalPages = Math.ceil(count / take);
+
+    return { invoices, totalPages };
   }
 
   public async getPlaceInvoices(id: number, take = 100, skip = 0) {
@@ -89,11 +97,15 @@ export class InvoicesService {
 
     const place = await this.placesService.getPlace(id);
 
-    return this.invoiceRepository.find({
+    const [invoices, count] = await this.invoiceRepository.findAndCount({
       where: { currentPlace: { id: place.id } },
       take,
       skip,
     });
+
+    const totalPages = Math.ceil(count / take);
+
+    return { invoices, totalPages };
   }
 
   public async getInvoice(user: User, id: string) {
@@ -121,12 +133,27 @@ export class InvoicesService {
   }
 
   public async createInvoice(user: User, createInvoiceDto: CreateInvoiceDto) {
+    const { senderDepartmentId, receiverDepartmentId, ...invoiceData } =
+      createInvoiceDto;
+
+    const senderDepartment =
+      await this.placesService.getDepartment(senderDepartmentId);
+    const receiverDepartment =
+      await this.placesService.getDepartment(receiverDepartmentId);
+
     const invoice = await this.invoiceRepository.save({
-      ...createInvoiceDto,
+      ...invoiceData,
+      senderDepartment: { id: senderDepartment.id },
+      receiverDepartment: { id: receiverDepartment.id },
       creator: { id: user.id },
     });
 
-    this.eventsService.emitEvent(user, {
+    await this.userInvoiceRepository.save({
+      userId: user.id,
+      invoiceId: invoice.id,
+    });
+
+    await this.eventsService.emitEvent(user, {
       invoiceId: invoice.id,
       type: EventType.CREATED,
     });
@@ -161,16 +188,31 @@ export class InvoicesService {
     });
   }
 
+  public async untrackInvoice(user: User, id: string) {
+    const invoice = await this.getInvoice(user, id);
+
+    await this.userInvoiceRepository.delete({
+      userId: user.id,
+      invoiceId: invoice.id,
+    });
+  }
+
   public async getTrackedInvoices(user: User, take = 100, skip = 0) {
     if (take > 100) take = 100;
 
-    const [invoiceIds, count] = await this.userInvoiceRepository.findAndCount({
-      where: { userId: user.id },
-      take,
-      skip,
-    });
+    const [userInvoices, count] = await this.userInvoiceRepository.findAndCount(
+      {
+        where: { userId: user.id },
+        take,
+        skip,
+      },
+    );
 
-    const invoices = this.invoiceRepository.findBy({ id: In(invoiceIds) });
+    const invoiceIds = userInvoices.map((userInvoice) => userInvoice.invoiceId);
+
+    const invoices = await this.invoiceRepository.findBy({
+      id: In(invoiceIds),
+    });
 
     const totalPages = Math.ceil(count / take);
 
