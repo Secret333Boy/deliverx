@@ -69,4 +69,11 @@ export class EventsService {
 
     if (err) throw new BadRequestException(err.message);
   }
+
+  public getInvoiceEvents(invoiceId: string) {
+    return this.eventsRepository.find({
+      where: { invoice: { id: invoiceId }, processed: true, failed: false },
+      order: { time: 'asc' },
+    });
+  }
 }

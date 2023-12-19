@@ -132,6 +132,14 @@ export class InvoicesService {
     return invoice;
   }
 
+  public async getInvoiceEvents(user: User, id: string) {
+    const invoice = await this.getInvoice(user, id);
+
+    const events = await this.eventsService.getInvoiceEvents(invoice.id);
+
+    return events;
+  }
+
   public async createInvoice(user: User, createInvoiceDto: CreateInvoiceDto) {
     const { senderDepartmentId, receiverDepartmentId, ...invoiceData } =
       createInvoiceDto;

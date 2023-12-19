@@ -78,6 +78,15 @@ export class InvoicesController {
     return this.invoicesService.getInvoice(user, id);
   }
 
+  @Get('/:id/events')
+  @UseGuards(JwtAuthGuard)
+  public getInvoiceEvents(
+    @UserData() user: User,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.invoicesService.getInvoiceEvents(user, id);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   public createInvoice(
