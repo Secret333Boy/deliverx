@@ -4,12 +4,13 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-import { FlowEventEmitter } from './flow-event.emitter';
+import { FlowEventEmitter, FlowEventPayload } from './flow-event.emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Event } from './entities/event.entity';
 import { DataSource, Repository } from 'typeorm';
 import { FlowEventDto } from './dto/flow-event.dto';
 import { User } from '../users/entities/user.entity';
+import { EventType } from './entities/event-type.enum';
 
 @Injectable()
 export class EventsService {
@@ -75,5 +76,12 @@ export class EventsService {
       where: { invoice: { id: invoiceId }, processed: true, failed: false },
       order: { time: 'asc' },
     });
+  }
+
+  public async listen(
+    event: EventType | '*',
+    handler: (e: FlowEventPayload) => void | Promise<void>,
+  ) {
+    this.flowEventEmitter.on(event, handler);
   }
 }

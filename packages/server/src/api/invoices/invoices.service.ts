@@ -14,7 +14,6 @@ import { Role } from '../users/entities/role.enum';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UsersService } from '../users/users.service';
 import { PlacesService } from '../places/places.service';
-import { FlowEventEmitter } from '../events/flow-event.emitter';
 import { EventType } from '../events/entities/event-type.enum';
 import { InvoiceEventProcessor } from './invoice-event.processor';
 import { EventsService } from '../events/events.service';
@@ -36,7 +35,6 @@ export class InvoicesService {
     private userInvoiceRepository: Repository<UserInvoice>,
     @Inject(UsersService) private usersService: UsersService,
     @Inject(PlacesService) private placesService: PlacesService,
-    @Inject(FlowEventEmitter) private flowEventEmitter: FlowEventEmitter,
     @Inject(EventsService) private eventsService: EventsService,
     @Inject(InvoiceEventProcessor)
     private invoiceEventProcessor: InvoiceEventProcessor,
@@ -45,7 +43,7 @@ export class InvoicesService {
   }
 
   public listenToFlowEvents() {
-    this.flowEventEmitter.on(
+    this.eventsService.listen(
       '*',
       async (event) => await this.invoiceEventProcessor.process(event),
     );
