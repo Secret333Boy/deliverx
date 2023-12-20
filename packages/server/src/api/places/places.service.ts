@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Place } from './entities/place.entity';
 import { Repository } from 'typeorm';
 import { PlaceType } from './entities/place-type.enum';
+import { CreatePlaceDto } from './dto/create-place.dto';
+import { PatchPlaceDto } from './dto/patch-place.dto';
 
 @Injectable()
 export class PlacesService {
@@ -29,6 +31,28 @@ export class PlacesService {
     const totalPages = Math.ceil(count / take);
 
     return { places, totalPages };
+  }
+
+  public async createPlace(createPlaceDto: CreatePlaceDto) {
+    await this.placeRepository.save({ ...createPlaceDto });
+  }
+
+  public async patchPlace(id: number, patchPlaceDto: PatchPlaceDto) {
+    const place = await this.placeRepository.findOneBy({ id });
+
+    if (!place)
+      throw new NotFoundException(this.PLACE_NOT_FOUND_EXCEPTION_MESSAGE);
+
+    await this.placeRepository.save({ ...place, ...patchPlaceDto });
+  }
+
+  public async deletePlace(id: number) {
+    const place = await this.placeRepository.findOneBy({ id });
+
+    if (!place)
+      throw new NotFoundException(this.PLACE_NOT_FOUND_EXCEPTION_MESSAGE);
+
+    await this.placeRepository.delete({ id: place.id });
   }
 
   public async getPlace(id: number) {
