@@ -11,6 +11,7 @@ import { DataSource, Repository } from 'typeorm';
 import { FlowEventDto } from './dto/flow-event.dto';
 import { User } from '../users/entities/user.entity';
 import { EventType } from './entities/event-type.enum';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class EventsService {
@@ -20,6 +21,7 @@ export class EventsService {
     private dataSource: DataSource,
     @InjectRepository(Event) private eventsRepository: Repository<Event>,
     @Inject(FlowEventEmitter) private flowEventEmitter: FlowEventEmitter,
+    @Inject(EmailService) private emailService: EmailService,
   ) {}
 
   public async emitEvent(user: User, flowEventDto: FlowEventDto) {

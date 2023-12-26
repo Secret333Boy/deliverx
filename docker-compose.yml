@@ -39,6 +39,8 @@ services:
       - JWT_REFRESH_SECRET
       - FRONTEND_URL
       - ROOT_ADMIN_PASSWORD
+      - EMAIL_USER
+      - EMAIL_PASS
     depends_on:
       db-migrations:
         condition: service_completed_successfully

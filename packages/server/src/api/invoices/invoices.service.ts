@@ -35,7 +35,8 @@ export class InvoicesService {
     private userInvoiceRepository: Repository<UserInvoice>,
     @Inject(UsersService) private usersService: UsersService,
     @Inject(PlacesService) private placesService: PlacesService,
-    @Inject(EventsService) private eventsService: EventsService,
+    @Inject(EventsService)
+    private eventsService: EventsService,
     @Inject(InvoiceEventProcessor)
     private invoiceEventProcessor: InvoiceEventProcessor,
   ) {
@@ -223,5 +224,9 @@ export class InvoicesService {
     const totalPages = Math.ceil(count / take);
 
     return { invoices, totalPages };
+  }
+
+  public getInvoiceTrackers(id: string) {
+    return this.userInvoiceRepository.findBy({ invoiceId: id });
   }
 }
