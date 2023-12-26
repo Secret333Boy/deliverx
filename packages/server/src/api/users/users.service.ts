@@ -87,9 +87,9 @@ export class UsersService {
   }
 
   public async getWorker(id: string) {
-    const worker = await this.usersRepository.findOneBy({
-      id,
-      role: Not(Role.USER),
+    const worker = await this.usersRepository.findOne({
+      where: { id, role: Not(Role.USER) },
+      relations: ['place'],
     });
 
     if (!worker)

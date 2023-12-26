@@ -111,7 +111,7 @@ export class InvoicesService {
       where: {
         id,
       },
-      relations: ['creator'],
+      relations: ['creator', 'currentPlace'],
     });
 
     if (!invoice)

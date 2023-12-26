@@ -96,7 +96,7 @@ export class InvoicesController {
     return this.invoicesService.createInvoice(user, createInvoiceDto);
   }
 
-  @Post('/track/:id')
+  @Post('/:id/track')
   @UseGuards(JwtAuthGuard)
   public trackInvoice(
     @UserData() user: User,
@@ -105,7 +105,7 @@ export class InvoicesController {
     return this.invoicesService.trackInvoice(user, id);
   }
 
-  @Delete('/untrack/:id')
+  @Delete('/:id/untrack')
   @UseGuards(JwtAuthGuard)
   public untrackInvoice(
     @UserData() user: User,
