@@ -5,6 +5,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from './entities/invoice.entity';
@@ -35,7 +36,7 @@ export class InvoicesService {
     private userInvoiceRepository: Repository<UserInvoice>,
     @Inject(UsersService) private usersService: UsersService,
     @Inject(PlacesService) private placesService: PlacesService,
-    @Inject(EventsService)
+    @Inject(forwardRef(() => EventsService))
     private eventsService: EventsService,
     @Inject(InvoiceEventProcessor)
     private invoiceEventProcessor: InvoiceEventProcessor,
@@ -226,7 +227,13 @@ export class InvoicesService {
     return { invoices, totalPages };
   }
 
-  public getInvoiceTrackers(id: string) {
-    return this.userInvoiceRepository.findBy({ invoiceId: id });
+  public async getInvoiceTrackers(id: string) {
+    const records = await this.userInvoiceRepository.findBy({ invoiceId: id });
+
+    const userIds = records.map((record) => record.userId);
+
+    const trackers = await this.usersService.getBulkUsers(userIds);
+
+    return trackers;
   }
 }

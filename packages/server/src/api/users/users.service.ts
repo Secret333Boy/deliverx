@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -194,5 +194,13 @@ export class UsersService {
     });
 
     return place;
+  }
+
+  public async getBulkUsers(ids: string[]) {
+    const users = await this.usersRepository.findBy({ id: In(ids) });
+
+    users.forEach((user) => delete user.hash);
+
+    return users;
   }
 }

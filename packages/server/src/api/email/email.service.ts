@@ -1,6 +1,5 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import { InvoicesService } from '../invoices/invoices.service';
 
 @Injectable()
 export class EmailService {
@@ -13,8 +12,6 @@ export class EmailService {
       pass: process.env.EMAIL_PASS,
     },
   });
-
-  constructor() {}
 
   public sendEmail(to: string, text: string, html: string) {
     this.transporter.sendMail({ from: process.env.EMAIL_USER, to, text, html });

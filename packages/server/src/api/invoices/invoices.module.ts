@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { InvoicesController } from './invoices.controller';
 import { InvoicesService } from './invoices.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -18,5 +18,6 @@ import { UserInvoice } from './entities/user-invoice.entity';
   ],
   controllers: [InvoicesController],
   providers: [InvoicesService, InvoiceEventProcessor],
+  exports: [InvoicesService],
 })
 export class InvoicesModule {}

@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   Logger,
+  forwardRef,
 } from '@nestjs/common';
 import { FlowEventEmitter, FlowEventPayload } from './flow-event.emitter';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,6 +13,7 @@ import { FlowEventDto } from './dto/flow-event.dto';
 import { User } from '../users/entities/user.entity';
 import { EventType } from './entities/event-type.enum';
 import { EmailService } from '../email/email.service';
+import { InvoicesService } from '../invoices/invoices.service';
 
 @Injectable()
 export class EventsService {
@@ -21,6 +23,8 @@ export class EventsService {
     private dataSource: DataSource,
     @InjectRepository(Event) private eventsRepository: Repository<Event>,
     @Inject(FlowEventEmitter) private flowEventEmitter: FlowEventEmitter,
+    @Inject(forwardRef(() => InvoicesService))
+    private invoicesService: InvoicesService,
     @Inject(EmailService) private emailService: EmailService,
   ) {}
 
@@ -49,6 +53,14 @@ export class EventsService {
         user,
         queryRunner,
       });
+
+      const trackers = await this.invoicesService.getInvoiceTrackers(invoiceId);
+
+      const message = `Event hit for tracked invoice: ${invoiceId}[${event.type}] - ${event.time}`;
+
+      for (const tracker of trackers) {
+        this.emailService.sendEmail(tracker.email, message, message);
+      }
 
       await queryRunner.manager.save(Event, { id: event.id, processed: true });
 
