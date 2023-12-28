@@ -71,7 +71,6 @@ export class InvoicesService {
     if (take > 100) take = 100;
 
     const isWorker = user.role !== Role.USER;
-
     if (!isWorker)
       throw new ForbiddenException(
         this.INVOICE_NOT_A_WORKER_FORBIDDEN_EXCEPTION_MESSAGE,
