@@ -107,6 +107,34 @@ export class InvoicesService {
     return { invoices, totalPages };
   }
 
+  public async getInplaceInvoicesByNextPlaceId(
+    user: User,
+    nextPlaceId: number,
+    take = 100,
+    skip = 0,
+  ) {
+    if (take > 100) take = 100;
+
+    const workerPlace = await this.usersService.getWorkerPlace(user.id);
+
+    if (!workerPlace) return { invoices: [], totalPages: 1 };
+
+    const place = await this.placesService.getPlace(nextPlaceId);
+
+    const [invoices, count] = await this.invoiceRepository.findAndCount({
+      where: {
+        currentPlace: { id: workerPlace.id },
+        nextPlace: { id: place.id },
+      },
+      take,
+      skip,
+    });
+
+    const totalPages = Math.ceil(count / take);
+
+    return { invoices, totalPages };
+  }
+
   public async getInvoice(user: User, id: string) {
     const invoice = await this.invoiceRepository.findOne({
       where: {
