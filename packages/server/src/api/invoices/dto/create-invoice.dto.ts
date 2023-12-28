@@ -1,27 +1,21 @@
-import {
-  IsBoolean,
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateInvoiceDto {
   @IsString()
   @IsNotEmpty()
   description: string;
 
-  @IsUUID()
+  @IsNumber()
   @IsNotEmpty()
-  senderDepartmentId: string;
+  senderDepartmentId: number;
 
   @IsString()
   @IsNotEmpty()
   senderFullName: string;
 
-  @IsUUID()
+  @IsNumber()
   @IsNotEmpty()
-  receiverDepartmentId: string;
+  receiverDepartmentId: number;
 
   @IsString()
   @IsNotEmpty()
@@ -30,8 +24,4 @@ export class CreateInvoiceDto {
   @IsEmail()
   @IsNotEmpty()
   receiverEmail: string;
-
-  @IsBoolean()
-  @IsNotEmpty()
-  fragile: boolean;
 }

@@ -2,11 +2,14 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Role } from './role.enum';
 import { Place } from 'src/api/places/entities/place.entity';
+import { Invoice } from 'src/api/invoices/entities/invoice.entity';
 
 @Entity()
 export class User {
@@ -31,4 +34,8 @@ export class User {
   @OneToOne(() => Place, { nullable: true })
   @JoinColumn()
   place?: Place;
+
+  @ManyToMany(() => Invoice)
+  @JoinTable({ name: 'user_invoice' })
+  trackedInvoices: Invoice[];
 }

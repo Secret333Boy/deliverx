@@ -12,7 +12,10 @@ export class TokenStore {
   @PrimaryGeneratedColumn('uuid')
   public id: string;
 
-  @OneToOne(() => User, (user) => user.id)
+  @OneToOne(() => User, (user) => user.id, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn()
   public user: User;
 

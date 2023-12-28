@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   ParseUUIDPipe,
   Patch,
   Post,
@@ -32,10 +31,10 @@ export class UsersController {
   @Get('/workers')
   @UseGuards(JwtAuthGuard, AdminGuard)
   public getWorkers(
-    @Query('take', ParseIntPipe) take?: number,
-    @Query('skip', ParseIntPipe) skip?: number,
+    @Query('take') take?: string,
+    @Query('skip') skip?: string,
   ) {
-    return this.usersService.getWorkers(take || 100, skip || 0);
+    return this.usersService.getWorkers(+take || 100, +skip || 0);
   }
 
   @Get('/workers/:id')

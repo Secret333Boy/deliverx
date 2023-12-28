@@ -5,6 +5,8 @@ import {
   IsEnum,
   Length,
   NotEquals,
+  IsNumber,
+  IsOptional,
 } from 'class-validator';
 import { Role } from '../entities/role.enum';
 
@@ -31,4 +33,8 @@ export class CreateWorkerDto {
   @IsEnum(Role)
   @NotEquals(Role.USER)
   role: Exclude<Role, Role.USER>;
+
+  @IsOptional()
+  @IsNumber()
+  placeId?: number;
 }

@@ -7,15 +7,17 @@ import { UsersModule } from '../users/users.module';
 import { PlacesModule } from '../places/places.module';
 import { EventsModule } from '../events/events.module';
 import { InvoiceEventProcessor } from './invoice-event.processor';
+import { UserInvoice } from './entities/user-invoice.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Invoice]),
+    TypeOrmModule.forFeature([Invoice, UserInvoice]),
     UsersModule,
     PlacesModule,
     EventsModule,
   ],
   controllers: [InvoicesController],
   providers: [InvoicesService, InvoiceEventProcessor],
+  exports: [InvoicesService],
 })
 export class InvoicesModule {}

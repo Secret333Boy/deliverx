@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -15,18 +17,22 @@ import * as bcrypt from 'bcrypt';
 import { Role } from './entities/role.enum';
 import { PatchWorkerDto } from './dto/patch-worker.dto';
 import { Place } from '../places/entities/place.entity';
+import { PlacesService } from '../places/places.service';
 
 @Injectable()
 export class UsersService {
   private readonly USER_NOT_FOUND_EXCEPTION_MESSAGE = 'User not found';
   private readonly WORKER_NOT_FOUND_EXCEPTION_MESSAGE = 'Worker not found';
-  private readonly WORKER_ALREADY_EXISTS_MESSAGE =
-    'Worker with this email already exists';
+  private readonly USER_ALREADY_EXISTS_CONFLICT_EXCEPTION_MESSAGE =
+    'User with this email already exists';
+
+  private readonly MAIN_ADMIN_UUID = '00000000-0000-0000-0000-000000000000';
 
   private readonly logger = new Logger(UsersService.name);
 
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    @Inject(PlacesService) private placesService: PlacesService,
   ) {
     this.initRootAdminAccount();
   }
@@ -42,7 +48,7 @@ export class UsersService {
 
       await this.usersRepository.upsert(
         {
-          id: '00000000-00000000-00000000-00000000',
+          id: this.MAIN_ADMIN_UUID,
           email: 'deliverx.admin@gmail.com',
           hash,
           firstName: 'admin',
@@ -77,13 +83,13 @@ export class UsersService {
 
     workers.forEach((worker) => delete worker.hash);
 
-    return { totalPages, workers };
+    return { workers, totalPages };
   }
 
   public async getWorker(id: string) {
-    const worker = await this.usersRepository.findOneBy({
-      id,
-      role: Not(Role.USER),
+    const worker = await this.usersRepository.findOne({
+      where: { id, role: Not(Role.USER) },
+      relations: ['place'],
     });
 
     if (!worker)
@@ -95,36 +101,64 @@ export class UsersService {
   }
 
   public async createWorker(createWorkerDto: CreateWorkerDto) {
+    const { placeId, password, ...workerData } = createWorkerDto;
+
     const workerInDb = await this.usersRepository.findOneBy({
       email: createWorkerDto.email,
-      role: Not(Role.USER),
     });
 
     if (workerInDb)
-      throw new ConflictException(this.WORKER_ALREADY_EXISTS_MESSAGE);
-
-    const { password, ...workerData } = createWorkerDto;
+      throw new ConflictException(
+        this.USER_ALREADY_EXISTS_CONFLICT_EXCEPTION_MESSAGE,
+      );
 
     const salt = bcrypt.genSaltSync();
     const hash = bcrypt.hashSync(password, salt);
 
-    return this.create({ ...workerData, hash });
+    const place = placeId
+      ? await this.placesService.getPlace(placeId)
+      : undefined;
+
+    await this.usersRepository.save({
+      ...workerData,
+      hash,
+      ...(place ? { place: { id: place.id } } : {}),
+    });
   }
 
   public async patchWorker(id: string, patchWorkerDto: PatchWorkerDto) {
     const worker = await this.getWorker(id);
 
-    const { password, ...workerData } = patchWorkerDto;
+    if (
+      worker.id === this.MAIN_ADMIN_UUID &&
+      patchWorkerDto.role &&
+      patchWorkerDto.role !== Role.ADMIN
+    )
+      throw new BadRequestException('Tried to patch main admin account role');
+
+    const { password, placeId, ...workerData } = patchWorkerDto;
 
     const hash = password
       ? bcrypt.hashSync(password, bcrypt.genSaltSync())
       : worker.hash;
 
-    await this.usersRepository.save({ ...worker, ...workerData, hash });
+    const place = placeId
+      ? await this.placesService.getPlace(placeId)
+      : undefined;
+
+    await this.usersRepository.save({
+      ...worker,
+      ...workerData,
+      hash,
+      ...(place ? { place: { id: place.id } } : {}),
+    });
   }
 
   public async deleteWorker(id: string) {
-    await this.getWorker(id);
+    const worker = await this.getWorker(id);
+
+    if (worker.id === this.MAIN_ADMIN_UUID)
+      throw new BadRequestException('Tried to delete main admin account');
 
     await this.delete(id);
   }
@@ -160,5 +194,13 @@ export class UsersService {
     });
 
     return place;
+  }
+
+  public async getBulkUsers(ids: string[]) {
+    const users = await this.usersRepository.findBy({ id: In(ids) });
+
+    users.forEach((user) => delete user.hash);
+
+    return users;
   }
 }

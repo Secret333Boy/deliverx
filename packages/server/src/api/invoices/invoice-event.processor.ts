@@ -32,12 +32,10 @@ export class InvoiceEventProcessor implements FlowEventProcessor {
       where: { id: user.id },
       relations: ['place'],
     });
-    if (!workerPlace)
-      throw new Error(this.WORKER_INSUFICIANT_PLACE_EXCEPTION_MESSAGE);
 
     switch (event.type) {
       case EventType.GOT:
-        if (workerPlace.id !== invoice.senderDepartment.id)
+        if (!workerPlace || workerPlace.id !== invoice.senderDepartment.id)
           throw new Error(this.WORKER_INSUFICIANT_PLACE_EXCEPTION_MESSAGE);
         this.logger.debug(
           `[${event.type}](${invoice.id}):${event.id} Worker place is correct`,
@@ -55,7 +53,7 @@ export class InvoiceEventProcessor implements FlowEventProcessor {
         });
         break;
       case EventType.GIVEN:
-        if (workerPlace.id !== invoice.receiverDepartment.id)
+        if (!workerPlace || workerPlace.id !== invoice.receiverDepartment.id)
           throw new Error(this.WORKER_INSUFICIANT_PLACE_EXCEPTION_MESSAGE);
         this.logger.debug(
           `[${event.type}](${invoice.id}):${event.id} Worker place is correct`,
