@@ -56,10 +56,15 @@ export class EventsService {
 
       const trackers = await this.invoicesService.getInvoiceTrackers(invoiceId);
 
-      const message = `Event hit for tracked invoice: ${invoiceId}[${event.type}] - ${event.time}`;
+      const eventTag = `${invoiceId}[${event.type}] - ${event.time}`;
+
+      const message = `Event hit for tracked invoice: ${eventTag}`;
 
       for (const tracker of trackers) {
         this.emailService.sendEmail(tracker.email, message, message);
+        this.logger.debug(
+          `Notified tracker ${tracker.email} about event $${eventTag}`,
+        );
       }
 
       await queryRunner.manager.save(Event, { id: event.id, processed: true });

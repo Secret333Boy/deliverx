@@ -14,6 +14,12 @@ export class EmailService {
   });
 
   public sendEmail(to: string, text: string, html: string) {
-    this.transporter.sendMail({ from: process.env.EMAIL_USER, to, text, html });
+    this.transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      subject: 'DeliverX Notification',
+      to,
+      text,
+      html,
+    });
   }
 }
