@@ -16,6 +16,8 @@ import { UserData } from '../users/decorators/user-data.decorator';
 import { User } from '../users/entities/user.entity';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { AdminGuard } from '../users/guards/admin.guard';
+import { RoleGuard } from '../users/guards/role.guard';
+import { Role } from '../users/entities/role.enum';
 
 @Controller('invoices')
 export class InvoicesController {
@@ -40,6 +42,22 @@ export class InvoicesController {
   ) {
     return this.invoicesService.getInplaceInvoices(
       user,
+      +take || 100,
+      +skip || 0,
+    );
+  }
+
+  @Get('/inplace/grouped/next-place/:id')
+  @UseGuards(JwtAuthGuard, new RoleGuard([Role.SORT_CENTER_WORKER, Role.ADMIN]))
+  public getInplaceInvoicesByNextPlaceId(
+    @UserData() user: User,
+    @Param('id', ParseIntPipe) id?: number,
+    @Query('take') take?: string,
+    @Query('skip') skip?: string,
+  ) {
+    return this.invoicesService.getInplaceInvoicesByNextPlaceId(
+      user,
+      id,
       +take || 100,
       +skip || 0,
     );
