@@ -1,7 +1,7 @@
 export enum Role {
-  USER,
-  DEPARTMENT_WORKER,
-  SORT_CENTER_WORKER,
-  DRIVER,
-  ADMIN,
+  USER = 'user',
+  DEPARTMENT_WORKER = 'depWorker',
+  SORT_CENTER_WORKER = 'sortWorker',
+  DRIVER = 'driver',
+  ADMIN = 'admin',
 }

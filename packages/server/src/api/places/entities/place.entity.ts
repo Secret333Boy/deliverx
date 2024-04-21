@@ -3,7 +3,7 @@ import { PlaceType } from './place-type.enum';
 
 @Entity()
 export class Place {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: number;
 
   @Column()
