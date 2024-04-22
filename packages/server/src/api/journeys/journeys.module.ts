@@ -1,4 +1,21 @@
 import { Module } from '@nestjs/common';
+import { JourneysController } from './journeys.controller';
+import { JourneysService } from './journeys.service';
+import { InvoicesModule } from '../invoices/invoices.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Journey } from './entities/journey.entity';
+import { VehiclesModule } from '../vehicles/vehicles.module';
+import { TransitionsModule } from '../transitions/transitions.module';
 
-@Module({})
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([Journey]),
+    InvoicesModule,
+    TransitionsModule,
+    VehiclesModule,
+  ],
+  controllers: [JourneysController],
+  providers: [JourneysService],
+  exports: [JourneysService],
+})
 export class JourneysModule {}

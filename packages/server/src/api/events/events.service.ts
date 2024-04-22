@@ -42,8 +42,6 @@ export class EventsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    let err: Error | undefined = undefined;
-
     try {
       this.logger.log(
         `Started processing event [${type}](${invoiceId}):${event.id}`,
@@ -82,12 +80,10 @@ export class EventsService {
 
       await this.eventsRepository.save({ id: event.id, failed: true });
 
-      err = e;
+      if (e instanceof Error) throw new BadRequestException(e.message);
+    } finally {
+      await queryRunner.release();
     }
-
-    await queryRunner.release();
-
-    if (err) throw new BadRequestException(err.message);
   }
 
   public getInvoiceEvents(invoiceId: string) {

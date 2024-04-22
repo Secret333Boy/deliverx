@@ -1,5 +1,12 @@
+import { Place } from 'src/api/places/entities/place.entity';
 import { User } from 'src/api/users/entities/user.entity';
-import { Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Vehicle {
@@ -9,4 +16,7 @@ export class Vehicle {
   @OneToOne(() => User)
   @JoinColumn()
   driver: User;
+
+  @ManyToOne(() => Place, (place) => place.id)
+  attachedSortCenter?: Place;
 }

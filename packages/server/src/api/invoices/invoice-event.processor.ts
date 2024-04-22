@@ -21,7 +21,7 @@ export class InvoiceEventProcessor implements FlowEventProcessor {
       relations: ['currentPlace', 'senderDepartment', 'receiverDepartment'],
     });
     if (!invoice) throw new Error(this.INVOICE_NOT_FOUND_EXCEPTION_MESSAGE);
-    if (invoice.finished)
+    if (invoice.isFinished)
       throw new Error(this.INVOICE_IS_FINISHED_EXCEPTION_MESSAGE);
 
     this.logger.debug(

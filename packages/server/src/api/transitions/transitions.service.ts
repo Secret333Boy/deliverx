@@ -5,6 +5,7 @@ import { DataSource, Repository } from 'typeorm';
 import { PlacesService } from '../places/places.service';
 import { PlaceType } from '../places/entities/place-type.enum';
 import { Place } from '../places/entities/place.entity';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class TransitionsService {
@@ -24,15 +25,14 @@ export class TransitionsService {
     return this.transitionRepository.find();
   }
 
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async updateTransitions() {
-    this.logger.log('Transtions update process started');
+    this.logger.log('Transitions update process started');
 
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.startTransaction();
     try {
-      await queryRunner.manager.delete(Transition, {});
-
       const places = await this.placesService.getAllPlaces();
 
       for (const place1 of places) {
@@ -56,18 +56,22 @@ export class TransitionsService {
 
           if (!closest.place) continue;
 
-          await queryRunner.manager.save(Transition, [
-            {
-              sourcePlace: { id: place1.id },
-              targetPlace: { id: closest.place.id },
-              cost: closest.length,
-            },
-            {
-              sourcePlace: { id: closest.place.id },
-              targetPlace: { id: place1.id },
-              cost: closest.length,
-            },
-          ]);
+          await queryRunner.manager.upsert(
+            Transition,
+            [
+              {
+                sourcePlace: { id: place1.id },
+                targetPlace: { id: closest.place.id },
+                cost: closest.length,
+              },
+              {
+                sourcePlace: { id: closest.place.id },
+                targetPlace: { id: place1.id },
+                cost: closest.length,
+              },
+            ],
+            ['sourcePlaceId', 'targetPlaceId'],
+          );
         } else if (place1.type === PlaceType.SORT_CENTER) {
           for (const place2 of places) {
             if (place2.type !== PlaceType.SORT_CENTER || place1 === place2)
@@ -78,16 +82,20 @@ export class TransitionsService {
                 (place1.lon - place2.lon) * (place1.lon - place2.lon),
             );
 
-            await queryRunner.manager.save(Transition, {
-              sourcePlace: { id: place1.id },
-              targetPlace: { id: place2.id },
-              cost: length,
-            });
+            await queryRunner.manager.upsert(
+              Transition,
+              {
+                sourcePlace: { id: place1.id },
+                targetPlace: { id: place2.id },
+                cost: length,
+              },
+              ['sourcePlaceId', 'targetPlaceId'],
+            );
           }
         }
       }
 
-      this.logger.log('Transtions update process finished');
+      this.logger.log('Transitions update process finished');
       await queryRunner.commitTransaction();
     } catch (e) {
       await queryRunner.rollbackTransaction();
@@ -95,5 +103,39 @@ export class TransitionsService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  public getTransitionToTheClosestSortCenter(placeA: Place) {
+    return this.transitionRepository.findOne({
+      where: {
+        sourcePlace: { id: placeA.id },
+        targetPlace: { type: PlaceType.SORT_CENTER },
+      },
+      order: {
+        cost: 'asc',
+      },
+      relations: ['sourcePlace', 'targetPlace'],
+    });
+  }
+
+  public async getClosestSortCenter(department: Place) {
+    const transition =
+      await this.getTransitionToTheClosestSortCenter(department);
+    if (!transition) return null;
+
+    return transition.targetPlace;
+  }
+
+  public getTransitionBetween(placeA: Place, placeB: Place) {
+    return this.transitionRepository.findOne({
+      where: {
+        sourcePlace: { id: placeA.id },
+        targetPlace: { id: placeB.id },
+      },
+      order: {
+        cost: 'asc',
+      },
+      relations: ['sourcePlace', 'targetPlace'],
+    });
   }
 }

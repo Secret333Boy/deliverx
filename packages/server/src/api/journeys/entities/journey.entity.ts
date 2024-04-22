@@ -24,10 +24,9 @@ export class Journey {
   @JoinColumn()
   transition: Transition;
 
-  @Column()
-  startTime: Date;
+  @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
 
-  @ManyToMany(() => Invoice)
-  @JoinTable()
+  @JoinColumn()
   invoices: Invoice[];
 }

@@ -7,9 +7,9 @@ import {
   NotFoundException,
   forwardRef,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from './entities/invoice.entity';
-import { In, QueryRunner, Repository } from 'typeorm';
+import { DataSource, In, QueryRunner, Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../users/entities/role.enum';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
@@ -19,6 +19,7 @@ import { EventType } from '../events/entities/event-type.enum';
 import { InvoiceEventProcessor } from './invoice-event.processor';
 import { EventsService } from '../events/events.service';
 import { UserInvoice } from './entities/user-invoice.entity';
+import { Journey } from '../journeys/entities/journey.entity';
 
 @Injectable()
 export class InvoicesService {
@@ -31,6 +32,7 @@ export class InvoicesService {
   private readonly logger = new Logger(InvoicesService.name);
 
   constructor(
+    @InjectDataSource() private dataSource: DataSource,
     @InjectRepository(Invoice) private invoiceRepository: Repository<Invoice>,
     @InjectRepository(UserInvoice)
     private userInvoiceRepository: Repository<UserInvoice>,
@@ -262,5 +264,9 @@ export class InvoicesService {
     const trackers = await this.usersService.getBulkUsers(userIds);
 
     return trackers;
+  }
+
+  public async attachJourney(id: string, journey: Journey) {
+    await this.invoiceRepository.save({ id, journey: { id: journey.id } });
   }
 }
