@@ -1,6 +1,7 @@
 import { Place } from 'src/api/places/entities/place.entity';
 import { User } from 'src/api/users/entities/user.entity';
 import {
+  BaseEntity,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -9,7 +10,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Vehicle {
+export class Vehicle extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

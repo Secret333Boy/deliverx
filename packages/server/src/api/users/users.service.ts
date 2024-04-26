@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { In, Not, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Not, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -178,7 +178,7 @@ export class UsersService {
     return new UserReponseDto(user);
   }
 
-  public findOneByPartial(user: Partial<User>) {
+  public findOneByPartial(user: FindOptionsWhere<User>) {
     return this.usersRepository.findOneBy(user);
   }
 
