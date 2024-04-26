@@ -5,7 +5,7 @@ import { Vehicle } from 'src/api/vehicles/entities/vehicle.entity';
 @Entity()
 export class Place {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column()
   name: string;

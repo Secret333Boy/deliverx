@@ -20,6 +20,9 @@ import { InvoiceEventProcessor } from './invoice-event.processor';
 import { EventsService } from '../events/events.service';
 import { UserInvoice } from './entities/user-invoice.entity';
 import { Journey } from '../journeys/entities/journey.entity';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { Place } from '../places/entities/place.entity';
+import { JourneysService } from '../journeys/journeys.service';
 
 @Injectable()
 export class InvoicesService {
@@ -38,6 +41,7 @@ export class InvoicesService {
     private userInvoiceRepository: Repository<UserInvoice>,
     @Inject(UsersService) private usersService: UsersService,
     @Inject(PlacesService) private placesService: PlacesService,
+    @Inject(JourneysService) private journeysService: JourneysService,
     @Inject(forwardRef(() => EventsService))
     private eventsService: EventsService,
     @Inject(InvoiceEventProcessor)
@@ -53,6 +57,34 @@ export class InvoicesService {
     );
 
     this.logger.debug(`Listening to flow events`);
+  }
+
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  public async recheckInvoicesForJourneyInclusion() {
+    const invoicesStream = await this.invoiceRepository
+      .createQueryBuilder('invoice')
+      .leftJoinAndSelect('invoice.currentPlace', 'currentPlace')
+      .select()
+      .stream();
+    for await (const rawInvoice of invoicesStream) {
+      const invoice = { currentPlace: null };
+
+      for (const key of Object.keys(rawInvoice)) {
+        if (key.startsWith('invoice_')) {
+          const invoiceKey = key.replace('invoice_', '');
+
+          invoice[invoiceKey] = rawInvoice[key];
+        } else if (key.startsWith('currentPlace_')) {
+          if (invoice.currentPlace === null) invoice.currentPlace = {};
+
+          const currentPlaceKey = key.replace('currentPlace_', '');
+
+          invoice.currentPlace[currentPlaceKey] = rawInvoice[key];
+        }
+      }
+
+      await this.journeysService.initiateJourney(<Invoice>invoice);
+    }
   }
 
   public async getInvoices(user: User, take = 100, skip = 0) {
@@ -93,7 +125,7 @@ export class InvoicesService {
     return { invoices, totalPages };
   }
 
-  public async getPlaceInvoices(id: number, take = 100, skip = 0) {
+  public async getPlaceInvoices(id: string, take = 100, skip = 0) {
     if (take > 100) take = 100;
 
     const place = await this.placesService.getPlace(id);
@@ -111,7 +143,7 @@ export class InvoicesService {
 
   public async getInplaceInvoicesByNextPlaceId(
     user: User,
-    nextPlaceId: number,
+    nextPlaceId: string,
     take = 100,
     skip = 0,
   ) {
@@ -198,7 +230,7 @@ export class InvoicesService {
 
   public async setInvoiceCurrentPlace(
     id: string,
-    placeId: number,
+    placeId: string,
     queryRunner?: QueryRunner,
   ) {
     const entityManager =

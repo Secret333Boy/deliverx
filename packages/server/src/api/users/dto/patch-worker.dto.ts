@@ -34,6 +34,6 @@ export class PatchWorkerDto {
   role?: Exclude<Role, Role.USER>;
 
   @IsOptional()
-  @IsNumber()
-  placeId?: number;
+  @IsString()
+  placeId?: string;
 }

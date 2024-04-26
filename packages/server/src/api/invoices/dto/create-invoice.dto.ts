@@ -1,21 +1,23 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class CreateInvoiceDto {
   @IsString()
   @IsNotEmpty()
   description: string;
 
-  @IsNumber()
+  @IsString()
+  @IsUUID()
   @IsNotEmpty()
-  senderDepartmentId: number;
+  senderDepartmentId: string;
 
   @IsString()
   @IsNotEmpty()
   senderFullName: string;
 
-  @IsNumber()
+  @IsString()
+  @IsUUID()
   @IsNotEmpty()
-  receiverDepartmentId: number;
+  receiverDepartmentId: string;
 
   @IsString()
   @IsNotEmpty()

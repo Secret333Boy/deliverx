@@ -37,7 +37,7 @@ export class PlacesService {
     await this.placeRepository.save({ ...createPlaceDto });
   }
 
-  public async patchPlace(id: number, patchPlaceDto: PatchPlaceDto) {
+  public async patchPlace(id: string, patchPlaceDto: PatchPlaceDto) {
     const place = await this.placeRepository.findOneBy({ id });
 
     if (!place)
@@ -46,7 +46,7 @@ export class PlacesService {
     await this.placeRepository.save({ ...place, ...patchPlaceDto });
   }
 
-  public async deletePlace(id: number) {
+  public async deletePlace(id: string) {
     const place = await this.placeRepository.findOneBy({ id });
 
     if (!place)
@@ -55,7 +55,7 @@ export class PlacesService {
     await this.placeRepository.delete({ id: place.id });
   }
 
-  public async getPlace(id: number) {
+  public async getPlace(id: string) {
     const place = await this.placeRepository.findOneBy({ id });
 
     if (!place)
@@ -78,7 +78,7 @@ export class PlacesService {
     return { places, totalPages };
   }
 
-  public async getDepartment(id: number) {
+  public async getDepartment(id: string) {
     const place = await this.placeRepository.findOneBy({
       id,
       type: PlaceType.DEPARTMENT,

@@ -27,6 +27,12 @@ export class Journey {
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
+  @Column({ nullable: true })
+  startedAt?: Date;
+
+  @Column({ nullable: true })
+  endedAt?: Date;
+
   @JoinColumn()
   invoices: Invoice[];
 }

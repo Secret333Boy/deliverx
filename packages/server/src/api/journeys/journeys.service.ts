@@ -1,20 +1,30 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  forwardRef,
+} from '@nestjs/common';
 import { InvoicesService } from '../invoices/invoices.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Journey } from './entities/journey.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Invoice } from '../invoices/entities/invoice.entity';
 import { PlaceType } from '../places/entities/place-type.enum';
 import { TransitionsService } from '../transitions/transitions.service';
 import { Transition } from '../transitions/entities/transition.entity';
 import { VehiclesService } from '../vehicles/vehicles.service';
+import { Vehicle } from '../vehicles/entities/vehicle.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class JourneysService {
   private logger = new Logger(JourneysService.name);
 
   constructor(
-    @Inject(InvoicesService)
+    @Inject(forwardRef(() => InvoicesService))
     private invoicesService: InvoicesService,
     @Inject(TransitionsService)
     private transitionsService: TransitionsService,
@@ -32,7 +42,17 @@ export class JourneysService {
           invoice.currentPlace,
         );
 
-      await this.generateOrAttachJourney(invoice, transition);
+      const vehicle = await this.vehiclesService.getRandomVehicle(
+        transition.targetPlace.id,
+      );
+      if (!vehicle) {
+        this.logger.warn(
+          `Failed to generate journey for invoice ${invoice.id}, because place ${transition.targetPlace.id} does not have vehicles attached`,
+        );
+        return;
+      }
+
+      await this.generateOrAttachJourney(invoice, transition, vehicle);
     } else {
       let transition = await this.transitionsService.getTransitionBetween(
         invoice.currentPlace,
@@ -55,28 +75,24 @@ export class JourneysService {
         );
       }
 
-      await this.generateOrAttachJourney(invoice, transition);
+      const vehicle = await this.vehiclesService.getRandomVehicle(
+        invoice.currentPlace.id,
+      );
+
+      await this.generateOrAttachJourney(invoice, transition, vehicle);
     }
   }
 
   public async generateOrAttachJourney(
     invoice: Invoice,
     transition: Transition,
+    vehicle: Vehicle,
   ) {
     let journeyInDb = await this.journeyRepository.findOneBy({
       transition: { id: transition.id },
+      startedAt: null,
     });
     if (!journeyInDb) {
-      const vehicle = await this.vehiclesService.getRandomVehicle(
-        transition.targetPlace.id,
-      );
-      if (!vehicle) {
-        this.logger.warn(
-          `Failed to generate journey, because place ${transition.targetPlace.id} does not have vehicles attached`,
-        );
-        return;
-      }
-
       journeyInDb = await this.journeyRepository.save({
         transition: { id: transition.id },
         vehicle: { id: vehicle.id },
@@ -84,5 +100,30 @@ export class JourneysService {
     }
 
     await this.invoicesService.attachJourney(invoice.id, journeyInDb);
+  }
+
+  public async startJourney(user: User, id: string) {
+    const journey = await this.journeyRepository.findOne({
+      where: { id },
+      relations: ['vehicle.driver'],
+    });
+    if (!journey) throw new NotFoundException('Journey not found');
+
+    if (journey.vehicle.driver.id !== user.id)
+      throw new ForbiddenException(
+        'You can not start a journey because are not attached to this vehicle',
+      );
+
+    if (journey.startedAt) throw new BadRequestException('Already started');
+
+    const anotherStartedJourney = await this.journeyRepository.findOneBy({
+      vehicle: { id: journey.vehicle.id },
+      startedAt: Not(null),
+      endedAt: null,
+    });
+    if (anotherStartedJourney)
+      throw new BadRequestException('Already started another journey');
+
+    await this.journeyRepository.save({ id, startedAt: new Date() });
   }
 }

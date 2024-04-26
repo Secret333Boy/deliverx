@@ -9,7 +9,7 @@ export class VehiclesService {
     @InjectRepository(Vehicle) private vehicleRepository: Repository<Vehicle>,
   ) {}
 
-  public async getRandomVehicle(sortCenterId: number) {
+  public async getRandomVehicle(sortCenterId: string) {
     const vehicles = await this.vehicleRepository.findBy({
       attachedSortCenter: { id: sortCenterId },
     });
