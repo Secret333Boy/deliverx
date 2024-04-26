@@ -1,9 +1,9 @@
-import { IsOptional, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateVehicleDto {
-  @IsOptional()
+  @IsNotEmpty()
   @IsUUID()
-  driverId?: string;
+  driverId: string;
 
   @IsOptional()
   @IsUUID()

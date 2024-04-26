@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Inject,
@@ -27,18 +28,28 @@ export class VehiclesController {
   @Get()
   @UseGuards(JwtAuthGuard, AdminGuard)
   public async getAllVehicles(
-    @Query('take', new ParseIntPipe({ optional: true })) take?: number,
-    @Query('skip', new ParseIntPipe({ optional: true })) skip?: number,
+    @Query('take', new DefaultValuePipe(100), new ParseIntPipe())
+    take: number,
+    @Query('skip', new DefaultValuePipe(0), new ParseIntPipe())
+    skip: number,
   ) {
     return this.vehiclesService.getAllVehicles(take, skip);
+  }
+
+  @Get('/:id')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  public async getVehicles(@Param('id', ParseUUIDPipe) id: string) {
+    return this.vehiclesService.getVehicle(id);
   }
 
   @Get('/inplace/:placeId')
   @UseGuards(JwtAuthGuard, AdminGuard)
   public async getInplaceVehicles(
     @Param('placeId', ParseUUIDPipe) placeId: string,
-    @Query('take', new ParseIntPipe({ optional: true })) take?: number,
-    @Query('skip', new ParseIntPipe({ optional: true })) skip?: number,
+    @Query('take', new DefaultValuePipe(100), new ParseIntPipe())
+    take: number,
+    @Query('skip', new DefaultValuePipe(0), new ParseIntPipe())
+    skip: number,
   ) {
     return this.vehiclesService.getInplaceVehicles(placeId, take, skip);
   }

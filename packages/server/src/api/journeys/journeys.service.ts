@@ -42,7 +42,7 @@ export class JourneysService {
           invoice.currentPlace,
         );
 
-      const vehicle = await this.vehiclesService.getRandomVehicle(
+      const vehicle = await this.vehiclesService.getRandomAttachedVehicle(
         transition.targetPlace.id,
       );
       if (!vehicle) {
@@ -75,7 +75,7 @@ export class JourneysService {
         );
       }
 
-      const vehicle = await this.vehiclesService.getRandomVehicle(
+      const vehicle = await this.vehiclesService.getRandomAttachedVehicle(
         invoice.currentPlace.id,
       );
 

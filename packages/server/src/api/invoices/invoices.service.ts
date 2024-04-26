@@ -64,10 +64,12 @@ export class InvoicesService {
     const invoicesStream = await this.invoiceRepository
       .createQueryBuilder('invoice')
       .leftJoinAndSelect('invoice.currentPlace', 'currentPlace')
+      .leftJoinAndSelect('invoice.journey', 'journey')
       .select()
       .stream();
+
     for await (const rawInvoice of invoicesStream) {
-      const invoice = { currentPlace: null };
+      const invoice = { currentPlace: null, journey: null };
 
       for (const key of Object.keys(rawInvoice)) {
         if (key.startsWith('invoice_')) {
@@ -75,11 +77,22 @@ export class InvoicesService {
 
           invoice[invoiceKey] = rawInvoice[key];
         } else if (key.startsWith('currentPlace_')) {
-          if (invoice.currentPlace === null) invoice.currentPlace = {};
+          if (!rawInvoice[key]) continue;
+
+          if (invoice.currentPlace === null && rawInvoice[key])
+            invoice.currentPlace = {};
 
           const currentPlaceKey = key.replace('currentPlace_', '');
 
           invoice.currentPlace[currentPlaceKey] = rawInvoice[key];
+        } else if (key.startsWith('journey_')) {
+          if (!rawInvoice[key]) continue;
+
+          if (invoice.journey === null) invoice.journey = {};
+
+          const journeyKey = key.replace('journey_', '');
+
+          invoice.journey[journeyKey] = rawInvoice[key];
         }
       }
 

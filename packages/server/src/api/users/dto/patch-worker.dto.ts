@@ -6,6 +6,7 @@ import {
   IsEnum,
   NotEquals,
   IsNumber,
+  IsUUID,
 } from 'class-validator';
 import { Role } from '../entities/role.enum';
 
@@ -35,5 +36,6 @@ export class PatchWorkerDto {
 
   @IsOptional()
   @IsString()
+  @IsUUID()
   placeId?: string;
 }
