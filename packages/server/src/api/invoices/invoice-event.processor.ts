@@ -5,7 +5,9 @@ import { EventType } from '../events/entities/event-type.enum';
 import { User } from '../users/entities/user.entity';
 import { FlowEventProcessor } from '../events/flow-event-processor.interface';
 import { Journey } from '../journeys/entities/journey.entity';
-import { IsNull, Not } from 'typeorm';
+import { IsNull, Not, QueryRunner } from 'typeorm';
+import { Place } from '../places/entities/place.entity';
+import { Event } from '../events/entities/event.entity';
 
 @Injectable()
 export class InvoiceEventProcessor implements FlowEventProcessor {
@@ -49,85 +51,118 @@ export class InvoiceEventProcessor implements FlowEventProcessor {
 
     switch (event.type) {
       case EventType.GOT:
-        if (!workerPlace || workerPlace.id !== invoice.senderDepartment.id)
-          throw new Error(this.WORKER_INSUFICIANT_PLACE_EXCEPTION_MESSAGE);
-        this.logger.debug(
-          `[${event.type}](${invoice.id}):${event.id} Worker place is correct`,
-        );
-
-        if (invoice.currentPlace || invoice.isInJourney)
-          throw new Error(this.INVOICE_ALREADY_HAS_PLACE_EXCEPTION_MESSAGE);
-        this.logger.debug(
-          `[${event.type}](${invoice.id}):${event.id} Invoice target: ${invoice.senderDepartment.id}`,
-        );
-
-        await queryRunner.manager.save(Invoice, {
-          id: invoice.id,
-          currentPlace: { id: invoice.senderDepartment.id },
-        });
+        await this.processGotEvent(workerPlace, invoice, event, queryRunner);
         break;
       case EventType.GIVEN:
-        if (!workerPlace || workerPlace.id !== invoice.receiverDepartment.id)
-          throw new Error(this.WORKER_INSUFICIANT_PLACE_EXCEPTION_MESSAGE);
-        this.logger.debug(
-          `[${event.type}](${invoice.id}):${event.id} Worker place is correct`,
-        );
-
-        if (
-          !invoice.currentPlace ||
-          invoice.currentPlace.id !== invoice.receiverDepartment.id
-        )
-          throw new Error(this.INVOICE_NOT_ON_FINAL_NODE_EXCEPTION_MESSAGE);
-
-        this.logger.debug(
-          `[${event.type}](${invoice.id}):${event.id} Invoice finished`,
-        );
-
-        await queryRunner.manager.save(Invoice, {
-          id: invoice.id,
-          currentPlace: null,
-          finished: true,
-        });
+        await this.processGivenEvent(workerPlace, invoice, event, queryRunner);
         break;
       case EventType.ONBOARD:
-        if (!journey) throw new Error(this.JOURNEY_NOT_FOUND_EXCEPTION_MESSAGE);
-        if (invoice.currentPlace.id !== journey.transition.sourcePlaceId)
-          throw new Error('Not in source node of journey');
-
-        await queryRunner.manager.save(Invoice, {
-          id: invoice.id,
-          currentPlace: null,
-          isInJourney: true,
-        });
+        await this.processOnboardEvent(journey, invoice, queryRunner);
         break;
       case EventType.TRANSITIONED:
-        if (!journey) throw new Error(this.JOURNEY_NOT_FOUND_EXCEPTION_MESSAGE);
-        if (!invoice.isInJourney) {
-          throw new Error(
-            'Not in journey. Tryied to perform transitioned event on invoice which in not in journey',
-          );
-        }
-
-        await queryRunner.manager.save(Invoice, {
-          id: invoice.id,
-          currentPlace: { id: journey.transition.targetPlaceId },
-          isInJourney: false,
-          journey: null,
-        });
-
-        // eslint-disable-next-line no-case-declarations
-        const journeyInvoicesLeft = await queryRunner.manager.countBy(Invoice, {
-          journey: { id: journey.id },
-        });
-
-        if (journeyInvoicesLeft === 0)
-          await queryRunner.manager.save(Journey, {
-            id: journey.id,
-            endedAt: new Date(),
-          });
+        await this.processTransitionedEvent(journey, invoice, queryRunner);
         break;
       default:
         break;
     }
+  }
+
+  private async processGotEvent(
+    workerPlace: Place,
+    invoice: Invoice,
+    event: Event,
+    queryRunner: QueryRunner,
+  ) {
+    if (!workerPlace || workerPlace.id !== invoice.senderDepartment.id)
+      throw new Error(this.WORKER_INSUFICIANT_PLACE_EXCEPTION_MESSAGE);
+    this.logger.debug(
+      `[${event.type}](${invoice.id}):${event.id} Worker place is correct`,
+    );
+
+    if (invoice.currentPlace || invoice.isInJourney)
+      throw new Error(this.INVOICE_ALREADY_HAS_PLACE_EXCEPTION_MESSAGE);
+    this.logger.debug(
+      `[${event.type}](${invoice.id}):${event.id} Invoice target: ${invoice.senderDepartment.id}`,
+    );
+
+    await queryRunner.manager.save(Invoice, {
+      id: invoice.id,
+      currentPlace: { id: invoice.senderDepartment.id },
+    });
+  }
+
+  private async processGivenEvent(
+    workerPlace: Place,
+    invoice: Invoice,
+    event: Event,
+    queryRunner: QueryRunner,
+  ) {
+    if (!workerPlace || workerPlace.id !== invoice.receiverDepartment.id)
+      throw new Error(this.WORKER_INSUFICIANT_PLACE_EXCEPTION_MESSAGE);
+    this.logger.debug(
+      `[${event.type}](${invoice.id}):${event.id} Worker place is correct`,
+    );
+
+    if (
+      !invoice.currentPlace ||
+      invoice.currentPlace.id !== invoice.receiverDepartment.id
+    )
+      throw new Error(this.INVOICE_NOT_ON_FINAL_NODE_EXCEPTION_MESSAGE);
+
+    this.logger.debug(
+      `[${event.type}](${invoice.id}):${event.id} Invoice finished`,
+    );
+
+    await queryRunner.manager.save(Invoice, {
+      id: invoice.id,
+      currentPlace: null,
+      finished: true,
+    });
+  }
+
+  private async processOnboardEvent(
+    journey: Journey,
+    invoice: Invoice,
+    queryRunner: QueryRunner,
+  ) {
+    if (!journey) throw new Error(this.JOURNEY_NOT_FOUND_EXCEPTION_MESSAGE);
+    if (invoice.currentPlace.id !== journey.transition.sourcePlaceId)
+      throw new Error('Not in source node of journey');
+
+    await queryRunner.manager.save(Invoice, {
+      id: invoice.id,
+      currentPlace: null,
+      isInJourney: true,
+    });
+  }
+
+  private async processTransitionedEvent(
+    journey: Journey,
+    invoice: Invoice,
+    queryRunner: QueryRunner,
+  ) {
+    if (!journey) throw new Error(this.JOURNEY_NOT_FOUND_EXCEPTION_MESSAGE);
+    if (!invoice.isInJourney) {
+      throw new Error(
+        'Not in journey. Tryied to perform transitioned event on invoice which in not in journey',
+      );
+    }
+
+    await queryRunner.manager.save(Invoice, {
+      id: invoice.id,
+      currentPlace: { id: journey.transition.targetPlaceId },
+      isInJourney: false,
+      journey: null,
+    });
+
+    const journeyInvoicesLeft = await queryRunner.manager.countBy(Invoice, {
+      journey: { id: journey.id },
+    });
+
+    if (journeyInvoicesLeft === 0)
+      await queryRunner.manager.save(Journey, {
+        id: journey.id,
+        endedAt: new Date(),
+      });
   }
 }

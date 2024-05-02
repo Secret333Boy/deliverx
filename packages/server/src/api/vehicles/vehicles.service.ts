@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Vehicle } from './entities/vehicle.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';

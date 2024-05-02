@@ -5,7 +5,6 @@ import {
   Length,
   IsEnum,
   NotEquals,
-  IsNumber,
   IsUUID,
 } from 'class-validator';
 import { Role } from '../entities/role.enum';

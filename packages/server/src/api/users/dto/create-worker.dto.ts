@@ -5,7 +5,6 @@ import {
   IsEnum,
   Length,
   NotEquals,
-  IsNumber,
   IsOptional,
 } from 'class-validator';
 import { Role } from '../entities/role.enum';
