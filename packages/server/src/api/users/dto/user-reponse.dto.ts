@@ -1,5 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { Role } from '../entities/role.enum';
+import { ApiHideProperty } from '@nestjs/swagger';
 
 export class UserReponseDto {
   constructor(partial: Partial<UserReponseDto>) {
@@ -11,6 +12,7 @@ export class UserReponseDto {
   public email: string;
 
   @Exclude()
+  @ApiHideProperty()
   public hash: string;
 
   public firstName: string;

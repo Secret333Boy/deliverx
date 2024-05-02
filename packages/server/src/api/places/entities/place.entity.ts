@@ -1,10 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { PlaceType } from './place-type.enum';
+import { Vehicle } from 'src/api/vehicles/entities/vehicle.entity';
 
 @Entity()
 export class Place {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
@@ -20,4 +21,7 @@ export class Place {
 
   @Column()
   lat: number;
+
+  @JoinColumn()
+  attachedVehicles: Vehicle[];
 }

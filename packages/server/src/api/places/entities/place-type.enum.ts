@@ -1,4 +1,4 @@
 export enum PlaceType {
-  DEPARTMENT,
-  SORT_CENTER,
+  DEPARTMENT = 'dep',
+  SORT_CENTER = 'sort',
 }

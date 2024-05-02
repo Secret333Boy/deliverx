@@ -5,8 +5,6 @@ import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -24,10 +22,15 @@ export class Journey {
   @JoinColumn()
   transition: Transition;
 
-  @Column()
-  startTime: Date;
+  @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
 
-  @ManyToMany(() => Invoice)
-  @JoinTable()
+  @Column({ nullable: true })
+  startedAt?: Date;
+
+  @Column({ nullable: true })
+  endedAt?: Date;
+
+  @JoinColumn()
   invoices: Invoice[];
 }

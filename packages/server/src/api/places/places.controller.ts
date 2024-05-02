@@ -5,7 +5,7 @@ import {
   Get,
   Inject,
   Param,
-  ParseIntPipe,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -36,7 +36,7 @@ export class PlacesController {
   @Patch('/:id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   public patchPlace(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() patchPlaceDto: PatchPlaceDto,
   ) {
     return this.placesService.patchPlace(id, patchPlaceDto);
@@ -44,7 +44,7 @@ export class PlacesController {
 
   @Delete('/:id')
   @UseGuards(JwtAuthGuard, AdminGuard)
-  public deletePlace(@Param('id', ParseIntPipe) id: number) {
+  public deletePlace(@Param('id', ParseUUIDPipe) id: string) {
     return this.placesService.deletePlace(id);
   }
 

@@ -12,5 +12,5 @@ export class FlowEventDto {
 
   @IsUUID()
   @IsOptional()
-  transitionId?: string;
+  journeyId?: string;
 }

@@ -29,20 +29,18 @@ export class EventsService {
   ) {}
 
   public async emitEvent(user: User, flowEventDto: FlowEventDto) {
-    const { invoiceId, type, transitionId } = flowEventDto;
+    const { invoiceId, type, journeyId } = flowEventDto;
 
     const event = await this.eventsRepository.save({
       invoice: { id: invoiceId },
       type,
-      ...(transitionId ? { transition: { id: transitionId } } : {}),
+      ...(journeyId ? { journey: { id: journeyId } } : {}),
     });
 
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
-    let err: Error | undefined = undefined;
 
     try {
       this.logger.log(
@@ -82,12 +80,10 @@ export class EventsService {
 
       await this.eventsRepository.save({ id: event.id, failed: true });
 
-      err = e;
+      if (e instanceof Error) throw new BadRequestException(e.message);
+    } finally {
+      await queryRunner.release();
     }
-
-    await queryRunner.release();
-
-    if (err) throw new BadRequestException(err.message);
   }
 
   public getInvoiceEvents(invoiceId: string) {

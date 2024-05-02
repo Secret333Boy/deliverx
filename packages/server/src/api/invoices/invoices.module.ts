@@ -8,6 +8,7 @@ import { PlacesModule } from '../places/places.module';
 import { EventsModule } from '../events/events.module';
 import { InvoiceEventProcessor } from './invoice-event.processor';
 import { UserInvoice } from './entities/user-invoice.entity';
+import { JourneysModule } from '../journeys/journeys.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { UserInvoice } from './entities/user-invoice.entity';
     UsersModule,
     PlacesModule,
     EventsModule,
+    JourneysModule,
   ],
   controllers: [InvoicesController],
   providers: [InvoicesService, InvoiceEventProcessor],

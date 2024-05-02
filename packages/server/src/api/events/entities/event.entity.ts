@@ -7,8 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { EventType } from './event-type.enum';
-import { Transition } from 'src/api/transitions/entities/transition.entity';
-import { Place } from 'src/api/places/entities/place.entity';
+import { Journey } from 'src/api/journeys/entities/journey.entity';
 
 @Entity()
 export class Event {
@@ -25,13 +24,11 @@ export class Event {
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   time: Date;
 
-  @ManyToOne(() => Place, { nullable: true })
+  @ManyToOne(() => Journey, (journey) => journey.id, {
+    nullable: true,
+  })
   @JoinColumn()
-  source?: Place;
-
-  @ManyToOne(() => Place, { nullable: true })
-  @JoinColumn()
-  target?: Place;
+  journey?: Journey;
 
   @Column({ default: false })
   processed: boolean;

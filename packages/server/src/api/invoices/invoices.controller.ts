@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   ParseUUIDPipe,
   Post,
   Query,
@@ -51,7 +50,7 @@ export class InvoicesController {
   @UseGuards(JwtAuthGuard, new RoleGuard([Role.SORT_CENTER_WORKER, Role.ADMIN]))
   public getInplaceInvoicesByNextPlaceId(
     @UserData() user: User,
-    @Param('id', ParseIntPipe) id?: number,
+    @Param('id', ParseUUIDPipe) id: string,
     @Query('take') take?: string,
     @Query('skip') skip?: string,
   ) {
@@ -66,7 +65,7 @@ export class InvoicesController {
   @Get('/inplace/:id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   public getPlaceInvoices(
-    @Param('id', ParseIntPipe) id?: number,
+    @Param('id', ParseUUIDPipe) id: string,
     @Query('take') take?: string,
     @Query('skip') skip?: string,
   ) {

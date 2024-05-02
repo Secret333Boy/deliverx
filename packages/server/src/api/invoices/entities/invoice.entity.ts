@@ -1,3 +1,4 @@
+import { Journey } from 'src/api/journeys/entities/journey.entity';
 import { Place } from 'src/api/places/entities/place.entity';
 import { User } from 'src/api/users/entities/user.entity';
 import {
@@ -42,12 +43,19 @@ export class Invoice {
 
   @ManyToOne(() => Place, { nullable: true })
   @JoinColumn()
-  currentPlace: Place;
+  currentPlace?: Place;
 
   @ManyToOne(() => Place, { nullable: true })
   @JoinColumn()
-  nextPlace: Place;
+  nextPlace?: Place;
 
   @Column({ default: false })
-  finished: boolean;
+  isFinished: boolean;
+
+  @Column({ default: false })
+  isInJourney: boolean;
+
+  @ManyToOne(() => Journey, (journey) => journey.id)
+  @JoinColumn()
+  journey?: Journey;
 }
