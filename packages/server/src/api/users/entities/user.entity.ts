@@ -4,6 +4,7 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -31,7 +32,7 @@ export class User {
   @Column('enum', { enum: Role })
   role: Role;
 
-  @OneToOne(() => Place, { nullable: true })
+  @ManyToOne(() => Place, (place) => place.id, { nullable: true })
   @JoinColumn()
   place?: Place;
 

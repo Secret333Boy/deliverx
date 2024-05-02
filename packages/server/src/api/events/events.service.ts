@@ -29,12 +29,12 @@ export class EventsService {
   ) {}
 
   public async emitEvent(user: User, flowEventDto: FlowEventDto) {
-    const { invoiceId, type, transitionId } = flowEventDto;
+    const { invoiceId, type, journeyId } = flowEventDto;
 
     const event = await this.eventsRepository.save({
       invoice: { id: invoiceId },
       type,
-      ...(transitionId ? { transition: { id: transitionId } } : {}),
+      ...(journeyId ? { journey: { id: journeyId } } : {}),
     });
 
     const queryRunner = this.dataSource.createQueryRunner();

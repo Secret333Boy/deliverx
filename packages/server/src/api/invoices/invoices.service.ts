@@ -7,9 +7,9 @@ import {
   NotFoundException,
   forwardRef,
 } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from './entities/invoice.entity';
-import { DataSource, In, QueryRunner, Repository } from 'typeorm';
+import { In, QueryRunner, Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../users/entities/role.enum';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
@@ -21,7 +21,6 @@ import { EventsService } from '../events/events.service';
 import { UserInvoice } from './entities/user-invoice.entity';
 import { Journey } from '../journeys/entities/journey.entity';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Place } from '../places/entities/place.entity';
 import { JourneysService } from '../journeys/journeys.service';
 
 @Injectable()
@@ -35,7 +34,6 @@ export class InvoicesService {
   private readonly logger = new Logger(InvoicesService.name);
 
   constructor(
-    @InjectDataSource() private dataSource: DataSource,
     @InjectRepository(Invoice) private invoiceRepository: Repository<Invoice>,
     @InjectRepository(UserInvoice)
     private userInvoiceRepository: Repository<UserInvoice>,
@@ -64,12 +62,18 @@ export class InvoicesService {
     const invoicesStream = await this.invoiceRepository
       .createQueryBuilder('invoice')
       .leftJoinAndSelect('invoice.currentPlace', 'currentPlace')
+      .leftJoinAndSelect('invoice.receiverDepartment', 'receiverDepartment')
+      // .leftJoinAndSelect('invoice.senderDepartment', 'senderDepartment')
       .leftJoinAndSelect('invoice.journey', 'journey')
       .select()
       .stream();
 
     for await (const rawInvoice of invoicesStream) {
-      const invoice = { currentPlace: null, journey: null };
+      const invoice = {
+        currentPlace: null,
+        journey: null,
+        receiverDepartment: null,
+      };
 
       for (const key of Object.keys(rawInvoice)) {
         if (key.startsWith('invoice_')) {
@@ -93,6 +97,15 @@ export class InvoicesService {
           const journeyKey = key.replace('journey_', '');
 
           invoice.journey[journeyKey] = rawInvoice[key];
+        } else if (key.startsWith('receiverDepartment_')) {
+          if (!rawInvoice[key]) continue;
+
+          if (invoice.receiverDepartment === null)
+            invoice.receiverDepartment = {};
+
+          const receiverDepartmentKey = key.replace('receiverDepartment_', '');
+
+          invoice.receiverDepartment[receiverDepartmentKey] = rawInvoice[key];
         }
       }
 

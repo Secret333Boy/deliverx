@@ -78,6 +78,12 @@ export class JourneysService {
       const vehicle = await this.vehiclesService.getRandomAttachedVehicle(
         invoice.currentPlace.id,
       );
+      if (!vehicle) {
+        this.logger.warn(
+          `Failed to generate journey for invoice ${invoice.id}, because place ${transition.targetPlace.id} does not have vehicles attached`,
+        );
+        return;
+      }
 
       await this.generateOrAttachJourney(invoice, transition, vehicle);
     }
