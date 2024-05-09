@@ -47,7 +47,7 @@ export class JourneysService {
       );
       if (!vehicle) {
         this.logger.warn(
-          `Failed to generate journey for invoice ${invoice.id}, because place ${transition.targetPlace.id} does not have vehicles attached`,
+          `Failed to generate journey for invoice ${invoice.id}, because place ${transition.targetPlace.id} does not have ready vehicles attached`,
         );
         return;
       }
@@ -80,7 +80,7 @@ export class JourneysService {
       );
       if (!vehicle) {
         this.logger.warn(
-          `Failed to generate journey for invoice ${invoice.id}, because place ${transition.targetPlace.id} does not have vehicles attached`,
+          `Failed to generate journey for invoice ${invoice.id}, because place ${transition.targetPlace.id} does not have ready vehicles attached`,
         );
         return;
       }

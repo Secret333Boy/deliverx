@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import LoginDto from './dtos/login.dto';
 import RegisterDto from './dtos/register.dto';
@@ -51,6 +52,8 @@ export class AuthService {
     const userInDB = await this.usersService.findOneByPartial({
       email: loginDto.email,
     });
+    if (!userInDB) throw new UnauthorizedException('User not found');
+
     const isValid = bcrypt.compareSync(loginDto.password, userInDB.hash);
     if (!isValid)
       throw new BadRequestException(this.PASSWORD_NOT_VALID_MESSAGE);

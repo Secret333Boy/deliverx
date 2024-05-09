@@ -14,9 +14,12 @@ export class Journey {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Vehicle, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Vehicle, (vehicle) => vehicle.id, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   @JoinColumn()
-  vehicle: Vehicle;
+  vehicle?: Vehicle;
 
   @ManyToOne(() => Transition, { onDelete: 'CASCADE' })
   @JoinColumn()
