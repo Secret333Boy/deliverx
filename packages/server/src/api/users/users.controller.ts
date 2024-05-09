@@ -28,6 +28,12 @@ export class UsersController {
     return this.usersService.findOne(user.id);
   }
 
+  @Delete('/')
+  @UseGuards(JwtAuthGuard)
+  public deleteUser(@UserData() user: User) {
+    return this.usersService.delete(user.id);
+  }
+
   @Get('/workers')
   @UseGuards(JwtAuthGuard, AdminGuard)
   public getWorkers(
