@@ -31,6 +31,8 @@ export class EventsService {
   public async emitEvent(user: User, flowEventDto: FlowEventDto) {
     const { invoiceId, type, journeyId } = flowEventDto;
 
+    await this.invoicesService.getInvoice(user, invoiceId);
+
     const event = await this.eventsRepository.save({
       invoice: { id: invoiceId },
       type,
@@ -90,6 +92,10 @@ export class EventsService {
     return this.eventsRepository.find({
       where: { invoice: { id: invoiceId }, processed: true, failed: false },
       order: { time: 'asc' },
+      relations: [
+        'journey.transition.sourcePlace',
+        'journey.transition.targetPlace',
+      ],
     });
   }
 

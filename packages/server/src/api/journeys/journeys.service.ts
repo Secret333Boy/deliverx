@@ -10,7 +10,7 @@ import {
 import { InvoicesService } from '../invoices/invoices.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Journey } from './entities/journey.entity';
-import { Not, Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { Invoice } from '../invoices/entities/invoice.entity';
 import { PlaceType } from '../places/entities/place-type.enum';
 import { TransitionsService } from '../transitions/transitions.service';
@@ -96,7 +96,7 @@ export class JourneysService {
   ) {
     let journeyInDb = await this.journeyRepository.findOneBy({
       transition: { id: transition.id },
-      startedAt: null,
+      startedAt: IsNull(),
     });
     if (!journeyInDb) {
       journeyInDb = await this.journeyRepository.save({
