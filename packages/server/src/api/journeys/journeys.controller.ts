@@ -1,9 +1,11 @@
 import {
   Controller,
+  Get,
   Inject,
   Param,
   ParseUUIDPipe,
   Patch,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -18,6 +20,20 @@ export class JourneysController {
   constructor(
     @Inject(JourneysService) private journeysService: JourneysService,
   ) {}
+
+  @Get('/ongoing')
+  @UseGuards(JwtAuthGuard, new RoleGuard([Role.DRIVER]))
+  public async getOngoingJourneys(
+    @UserData() user: User,
+    @Query('take') take?: string,
+    @Query('skip') skip?: string,
+  ) {
+    return this.journeysService.getOngoingJourneys(
+      user,
+      +take || 100,
+      +skip || 0,
+    );
+  }
 
   @Patch('/:id/start')
   @UseGuards(JwtAuthGuard, new RoleGuard([Role.DRIVER]))

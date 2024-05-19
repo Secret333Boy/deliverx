@@ -61,10 +61,14 @@ export class EventsService {
       const message = `Event hit for tracked invoice: ${eventTag}`;
 
       for (const tracker of trackers) {
-        this.emailService.sendEmail(tracker.email, message, message);
-        this.logger.debug(
-          `Notified tracker ${tracker.email} about event $${eventTag}`,
-        );
+        try {
+          await this.emailService.sendEmail(tracker.email, message, message);
+          this.logger.debug(
+            `Notified tracker ${tracker.email} about event $${eventTag}`,
+          );
+        } catch (e) {
+          this.logger.error(`Failed to notify tracker ${tracker.email}: ${e}`);
+        }
       }
 
       await queryRunner.manager.save(Event, { id: event.id, processed: true });

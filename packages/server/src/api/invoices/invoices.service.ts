@@ -167,9 +167,9 @@ export class InvoicesService {
     return { invoices, totalPages };
   }
 
-  public async getInplaceInvoicesByNextPlaceId(
+  public async getInplaceInvoicesByJourneyId(
     user: User,
-    nextPlaceId: string,
+    journeyId: string,
     take = 100,
     skip = 0,
   ) {
@@ -179,12 +179,10 @@ export class InvoicesService {
 
     if (!workerPlace) return { invoices: [], totalPages: 1 };
 
-    const place = await this.placesService.getPlace(nextPlaceId);
-
     const [invoices, count] = await this.invoiceRepository.findAndCount({
       where: {
         currentPlace: { id: workerPlace.id },
-        nextPlace: { id: place.id },
+        journey: { id: journeyId },
       },
       take,
       skip,

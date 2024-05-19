@@ -89,6 +89,24 @@ export class JourneysService {
     }
   }
 
+  public async getOngoingJourneys(user: User, take = 100, skip = 0) {
+    if (take > 100) take = 100;
+
+    const [journeys, count] = await this.journeyRepository.findAndCount({
+      where: { startedAt: IsNull() },
+      take,
+      skip,
+      order: { createdAt: 'DESC' },
+    });
+
+    const totalPages = Math.ceil(count / take);
+
+    return {
+      data: journeys,
+      totalPages,
+    };
+  }
+
   public async generateOrAttachJourney(
     invoice: Invoice,
     transition: Transition,
