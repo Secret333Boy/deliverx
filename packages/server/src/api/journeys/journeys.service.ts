@@ -89,6 +89,14 @@ export class JourneysService {
     }
   }
 
+  public async getCurrentJourney(user: User) {
+    return this.journeyRepository.findOneBy({
+      startedAt: Not(IsNull()),
+      endedAt: IsNull(),
+      vehicle: { driver: { id: user.id } },
+    });
+  }
+
   public async getOngoingJourneys(user: User, take = 100, skip = 0) {
     if (take > 100) take = 100;
 

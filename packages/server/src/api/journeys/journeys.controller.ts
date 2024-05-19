@@ -21,6 +21,12 @@ export class JourneysController {
     @Inject(JourneysService) private journeysService: JourneysService,
   ) {}
 
+  @Get('/current')
+  @UseGuards(JwtAuthGuard, new RoleGuard([Role.DRIVER]))
+  public async getCurrentJourney(@UserData() user: User) {
+    return this.journeysService.getCurrentJourney(user);
+  }
+
   @Get('/ongoing')
   @UseGuards(JwtAuthGuard, new RoleGuard([Role.DRIVER]))
   public async getOngoingJourneys(
