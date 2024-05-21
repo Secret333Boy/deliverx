@@ -10,7 +10,6 @@ import { EventsModule } from './events/events.module';
 import { EmailModule } from './email/email.module';
 import { TransitionsModule } from './transitions/transitions.module';
 import { JourneysModule } from './journeys/journeys.module';
-import { RoutingModule } from './routing/routing.module';
 
 @Module({
   imports: [
@@ -23,7 +22,6 @@ import { RoutingModule } from './routing/routing.module';
     EmailModule,
     TransitionsModule,
     JourneysModule,
-    RoutingModule,
   ],
   controllers: [ApiController],
   providers: [ApiService],

@@ -31,6 +31,8 @@ export class EventsService {
   public async emitEvent(user: User, flowEventDto: FlowEventDto) {
     const { invoiceId, type, journeyId } = flowEventDto;
 
+    await this.invoicesService.getInvoice(user, invoiceId);
+
     const event = await this.eventsRepository.save({
       invoice: { id: invoiceId },
       type,
@@ -59,10 +61,14 @@ export class EventsService {
       const message = `Event hit for tracked invoice: ${eventTag}`;
 
       for (const tracker of trackers) {
-        this.emailService.sendEmail(tracker.email, message, message);
-        this.logger.debug(
-          `Notified tracker ${tracker.email} about event $${eventTag}`,
-        );
+        try {
+          await this.emailService.sendEmail(tracker.email, message, message);
+          this.logger.debug(
+            `Notified tracker ${tracker.email} about event $${eventTag}`,
+          );
+        } catch (e) {
+          this.logger.error(`Failed to notify tracker ${tracker.email}: ${e}`);
+        }
       }
 
       await queryRunner.manager.save(Event, { id: event.id, processed: true });
@@ -90,6 +96,10 @@ export class EventsService {
     return this.eventsRepository.find({
       where: { invoice: { id: invoiceId }, processed: true, failed: false },
       order: { time: 'asc' },
+      relations: [
+        'journey.transition.sourcePlace',
+        'journey.transition.targetPlace',
+      ],
     });
   }
 

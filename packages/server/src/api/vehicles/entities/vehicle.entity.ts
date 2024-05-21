@@ -15,15 +15,19 @@ export class Vehicle extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => User, { nullable: false })
+  @OneToOne(() => User, {
+    nullable: true,
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn()
   driver: User;
 
   @ManyToOne(() => Place, (place) => place.id)
   attachedSortCenter?: Place;
 
-  @Column()
-  driverId: string;
+  @Column({ nullable: true })
+  driverId?: string;
 
   @Column({ nullable: true })
   attachedSortCenterId?: string;

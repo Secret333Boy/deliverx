@@ -46,7 +46,7 @@ export class InvoicesController {
     );
   }
 
-  @Get('/inplace/grouped/next-place/:id')
+  @Get('/inplace/grouped/journey/:id')
   @UseGuards(JwtAuthGuard, new RoleGuard([Role.SORT_CENTER_WORKER, Role.ADMIN]))
   public getInplaceInvoicesByNextPlaceId(
     @UserData() user: User,
@@ -54,7 +54,7 @@ export class InvoicesController {
     @Query('take') take?: string,
     @Query('skip') skip?: string,
   ) {
-    return this.invoicesService.getInplaceInvoicesByNextPlaceId(
+    return this.invoicesService.getInplaceInvoicesByJourneyId(
       user,
       id,
       +take || 100,

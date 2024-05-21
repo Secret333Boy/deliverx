@@ -10,7 +10,7 @@ import {
 import { InvoicesService } from '../invoices/invoices.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Journey } from './entities/journey.entity';
-import { Not, Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { Invoice } from '../invoices/entities/invoice.entity';
 import { PlaceType } from '../places/entities/place-type.enum';
 import { TransitionsService } from '../transitions/transitions.service';
@@ -47,7 +47,7 @@ export class JourneysService {
       );
       if (!vehicle) {
         this.logger.warn(
-          `Failed to generate journey for invoice ${invoice.id}, because place ${transition.targetPlace.id} does not have vehicles attached`,
+          `Failed to generate journey for invoice ${invoice.id}, because place ${transition.targetPlace.id} does not have ready vehicles attached`,
         );
         return;
       }
@@ -80,13 +80,39 @@ export class JourneysService {
       );
       if (!vehicle) {
         this.logger.warn(
-          `Failed to generate journey for invoice ${invoice.id}, because place ${transition.targetPlace.id} does not have vehicles attached`,
+          `Failed to generate journey for invoice ${invoice.id}, because place ${transition.targetPlace.id} does not have ready vehicles attached`,
         );
         return;
       }
 
       await this.generateOrAttachJourney(invoice, transition, vehicle);
     }
+  }
+
+  public async getCurrentJourney(user: User) {
+    return this.journeyRepository.findOneBy({
+      startedAt: Not(IsNull()),
+      endedAt: IsNull(),
+      vehicle: { driver: { id: user.id } },
+    });
+  }
+
+  public async getOngoingJourneys(user: User, take = 100, skip = 0) {
+    if (take > 100) take = 100;
+
+    const [journeys, count] = await this.journeyRepository.findAndCount({
+      where: { startedAt: IsNull() },
+      take,
+      skip,
+      order: { createdAt: 'DESC' },
+    });
+
+    const totalPages = Math.ceil(count / take);
+
+    return {
+      data: journeys,
+      totalPages,
+    };
   }
 
   public async generateOrAttachJourney(
@@ -96,7 +122,7 @@ export class JourneysService {
   ) {
     let journeyInDb = await this.journeyRepository.findOneBy({
       transition: { id: transition.id },
-      startedAt: null,
+      startedAt: IsNull(),
     });
     if (!journeyInDb) {
       journeyInDb = await this.journeyRepository.save({

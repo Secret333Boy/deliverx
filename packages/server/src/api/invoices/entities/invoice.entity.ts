@@ -14,9 +14,13 @@ export class Invoice {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.id, {
+    nullable: true,
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn()
-  creator: User;
+  creator?: User;
 
   @Column()
   description: string;
@@ -44,10 +48,6 @@ export class Invoice {
   @ManyToOne(() => Place, { nullable: true })
   @JoinColumn()
   currentPlace?: Place;
-
-  @ManyToOne(() => Place, { nullable: true })
-  @JoinColumn()
-  nextPlace?: Place;
 
   @Column({ default: false })
   isFinished: boolean;

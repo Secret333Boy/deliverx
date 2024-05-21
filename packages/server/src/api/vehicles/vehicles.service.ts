@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { Vehicle } from './entities/vehicle.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
@@ -126,6 +126,7 @@ export class VehiclesService {
   public async getRandomAttachedVehicle(sortCenterId: string) {
     const vehicles = await this.vehicleRepository.findBy({
       attachedSortCenter: { id: sortCenterId },
+      driverId: Not(IsNull()),
     });
 
     if (vehicles.length === 0) return null;
