@@ -7,6 +7,8 @@ import Register from './pages/Register';
 import CreateInvoice from './pages/CreateInvoice';
 import InvoiceDetails from './pages/InvoiceDetails';
 import WorkerDetails from './pages/WorkerDetails';
+import TrackGetting from './pages/TrackGetting';
+import TrackGiving from './pages/TrackGiving';
 
 const router = createBrowserRouter([
   {
@@ -54,6 +56,22 @@ const router = createBrowserRouter([
     element: (
       <AuthGuard>
         <WorkerDetails />
+      </AuthGuard>
+    ),
+  },
+  {
+    path: '/track/getting',
+    element: (
+      <AuthGuard>
+        <TrackGetting />
+      </AuthGuard>
+    ),
+  },
+  {
+    path: '/track/giving',
+    element: (
+      <AuthGuard>
+        <TrackGiving />
       </AuthGuard>
     ),
   },

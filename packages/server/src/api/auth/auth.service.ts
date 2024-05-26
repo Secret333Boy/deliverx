@@ -63,14 +63,16 @@ export class AuthService {
 
   public async validate(
     accessToken: string,
-    requiredRoles = [Role.USER, Role.ADMIN],
+    requiredRoles?: Role[],
   ): Promise<void> {
     const account = this.tokenService.verifyAccessToken(accessToken);
     const accountInDB = await this.usersService.findOneByPartial({
       email: account.email,
     });
-    if (!requiredRoles.includes(accountInDB.role))
+
+    if (requiredRoles && !requiredRoles.includes(accountInDB.role)) {
       throw new ForbiddenException("You don't have required role");
+    }
   }
 
   public async refresh(refreshToken: string): Promise<Tokens> {
