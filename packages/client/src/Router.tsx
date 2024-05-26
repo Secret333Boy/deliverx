@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import CreateInvoice from './pages/CreateInvoice';
 import InvoiceDetails from './pages/InvoiceDetails';
+import WorkerDetails from './pages/WorkerDetails';
 
 const router = createBrowserRouter([
   {
@@ -45,6 +46,14 @@ const router = createBrowserRouter([
     element: (
       <AuthGuard>
         <InvoiceDetails />
+      </AuthGuard>
+    ),
+  },
+  {
+    path: '/worker/:id',
+    element: (
+      <AuthGuard>
+        <WorkerDetails />
       </AuthGuard>
     ),
   },

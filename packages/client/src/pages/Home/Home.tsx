@@ -13,9 +13,6 @@ const Home = () => {
   const { screen } = useParams();
 
   const [user, setUser] = useState<User>();
-  const [chosenScreen, setChosenScreen] = useState<'worker' | 'user'>(
-    screen as any,
-  );
 
   const loadUser = async () => {
     try {
@@ -39,12 +36,11 @@ const Home = () => {
 
   if (!user) return <></>;
 
-  if (user.role === Role.USER || chosenScreen === 'user')
-    return <CustomerScreen />;
+  if (user.role === Role.USER || screen === 'user') return <CustomerScreen />;
 
-  if (chosenScreen === 'worker') return <WorkerScreen />;
+  if (screen === 'worker') return <WorkerScreen user={user} />;
 
-  return <ChooseScreen setChosenScreen={setChosenScreen} />;
+  return <ChooseScreen />;
 };
 
 export default Home;

@@ -77,6 +77,7 @@ export class UsersService {
       },
       take,
       skip,
+      relations: ['place'],
     });
 
     const totalPages = Math.ceil(count / take);
