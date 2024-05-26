@@ -3,6 +3,9 @@ import { createBrowserRouter } from 'react-router-dom';
 import { AuthGuard } from './guards';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import CreateInvoice from './pages/CreateInvoice';
+import InvoiceDetails from './pages/InvoiceDetails';
 
 const router = createBrowserRouter([
   {
@@ -14,8 +17,36 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: '/:screen',
+    element: (
+      <AuthGuard>
+        <Home />
+      </AuthGuard>
+    ),
+  },
+  {
     path: '/login',
     element: <Login />,
+  },
+  {
+    path: '/register',
+    element: <Register />,
+  },
+  {
+    path: '/create-invoice',
+    element: (
+      <AuthGuard>
+        <CreateInvoice />
+      </AuthGuard>
+    ),
+  },
+  {
+    path: '/invoice/:id',
+    element: (
+      <AuthGuard>
+        <InvoiceDetails />
+      </AuthGuard>
+    ),
   },
   {
     path: '*',

@@ -198,7 +198,12 @@ export class InvoicesService {
       where: {
         id,
       },
-      relations: ['creator', 'currentPlace'],
+      relations: [
+        'creator',
+        'currentPlace',
+        'senderDepartment',
+        'receiverDepartment',
+      ],
     });
 
     if (!invoice)
@@ -303,8 +308,11 @@ export class InvoicesService {
 
     const invoiceIds = userInvoices.map((userInvoice) => userInvoice.invoiceId);
 
-    const invoices = await this.invoiceRepository.findBy({
-      id: In(invoiceIds),
+    const invoices = await this.invoiceRepository.find({
+      where: {
+        id: In(invoiceIds),
+      },
+      relations: ['senderDepartment', 'receiverDepartment', 'currentPlace'],
     });
 
     const totalPages = Math.ceil(count / take);

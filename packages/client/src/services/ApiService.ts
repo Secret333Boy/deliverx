@@ -6,12 +6,12 @@ export class ApiService extends HttpService {
     super();
   }
 
-  public getJoinedPath(endpoint: BackendRoute) {
+  public getJoinedPath(endpoint: string) {
     return `${this.backendUrl}/api/v1${endpoint}`;
   }
 
   public async requestWithAuth<T>(
-    endpoint: BackendRoute,
+    endpoint: string,
     init?: RequestInit | undefined,
     accessToken?: string,
   ): Promise<T> {
@@ -38,7 +38,14 @@ export class ApiService extends HttpService {
         throw e;
       }
       accessToken = localStorage.getItem('accessToken') || '';
-      res = await super.requestWithAuth<T>(url, init, accessToken);
+      res = await super.requestWithAuth<T>(
+        url,
+        {
+          headers: { 'Content-Type': 'application/json', ...init?.headers },
+          ...init,
+        },
+        accessToken,
+      );
       return res;
     }
   }
@@ -51,25 +58,25 @@ export class ApiService extends HttpService {
     localStorage.setItem('accessToken', accessToken);
   }
 
-  public async get<T>(endpoint: BackendRoute) {
+  public async get<T>(endpoint: string) {
     return this.requestWithAuth<T>(endpoint);
   }
 
-  public async post<T, B = unknown>(endpoint: BackendRoute, body?: B) {
+  public async post<T, B = unknown>(endpoint: string, body?: B) {
     return this.requestWithAuth<T>(endpoint, {
       method: 'POST',
       body: JSON.stringify(body),
     });
   }
 
-  public async patch<T, B>(endpoint: BackendRoute, body?: B) {
+  public async patch<T, B>(endpoint: string, body?: B) {
     return this.requestWithAuth<T>(endpoint, {
       method: 'PATCH',
       body: JSON.stringify(body),
     });
   }
 
-  public async delete<T, B>(endpoint: BackendRoute, body?: B) {
+  public async delete<T, B>(endpoint: string, body?: B) {
     return this.requestWithAuth<T>(endpoint, {
       method: 'DELETE',
       body: JSON.stringify(body),

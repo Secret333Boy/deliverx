@@ -14,7 +14,7 @@ export class HttpException {
     body?: HttpExceptionBody,
   ) {
     if (Array.isArray(body?.message)) {
-      this.body = { message: body?.message?.join('\n') };
+      this.body = { message: body?.message?.join(', ') };
     } else {
       this.body = body;
     }
