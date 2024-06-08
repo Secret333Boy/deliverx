@@ -1,13 +1,13 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine as builder
 WORKDIR /app
-COPY ./public ./public
-COPY ./src ./src
-COPY ./package*.json .
-COPY ./tsconfig.json .
-RUN npm i --ignore-scripts
+COPY . .
+RUN npm i
 RUN npm run build
 
-FROM nginx:stable-alpine AS production
+FROM nginx:stable-alpine as runner
+WORKDIR /app
 COPY --from=builder /app/build /usr/share/nginx/html
-EXPOSE 80
-CMD [ "nginx", "-g", "daemon off;" ]
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+ENV PORT 80
+EXPOSE $PORT
+CMD sed -i -e 's/$PORT/'"$PORT"'/g' /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'

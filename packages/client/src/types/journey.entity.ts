@@ -1,3 +1,4 @@
+import { Invoice } from './invoice.entity';
 import { Transition } from './transition.entity';
 
 export interface Journey {
@@ -7,4 +8,5 @@ export interface Journey {
   createdAt: string;
   startedAt?: string;
   endedAt?: string;
+  invoices?: Invoice[];
 }

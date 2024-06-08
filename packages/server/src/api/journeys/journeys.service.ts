@@ -90,10 +90,19 @@ export class JourneysService {
   }
 
   public async getCurrentJourney(user: User) {
-    return this.journeyRepository.findOneBy({
-      startedAt: Not(IsNull()),
-      endedAt: IsNull(),
-      vehicle: { driver: { id: user.id } },
+    return this.journeyRepository.findOne({
+      where: {
+        startedAt: Not(IsNull()),
+        endedAt: IsNull(),
+        vehicle: { driver: { id: user.id } },
+      },
+      relations: [
+        'transition.sourcePlace',
+        'transition.targetPlace',
+        'invoices.senderDepartment',
+        'invoices.receiverDepartment',
+        'invoices.currentPlace',
+      ],
     });
   }
 
@@ -105,6 +114,7 @@ export class JourneysService {
       take,
       skip,
       order: { createdAt: 'DESC' },
+      relations: ['transition.sourcePlace', 'transition.targetPlace'],
     });
 
     const totalPages = Math.ceil(count / take);

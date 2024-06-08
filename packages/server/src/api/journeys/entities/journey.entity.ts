@@ -6,6 +6,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -34,6 +35,6 @@ export class Journey {
   @Column({ nullable: true })
   endedAt?: Date;
 
-  @JoinColumn()
+  @OneToMany(() => Invoice, (invoice) => invoice.journey)
   invoices: Invoice[];
 }

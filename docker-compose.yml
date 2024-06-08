@@ -5,6 +5,7 @@ services:
       - 3000:80
     environment:
       - NODE_ENV
+      - REACT_APP_BACKEND_URL
   db:
     image: postgres:16
     environment:

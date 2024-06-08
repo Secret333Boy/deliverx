@@ -81,13 +81,13 @@ const CustomerScreen: FC = () => {
 
       <Table
         data={trackedInvoices}
-        headers={['Invoice id', 'Route', 'Status', 'Actions']}
+        headers={['Invoice id', 'Route', 'Current place', 'Actions']}
         generateRow={(item) => [
           <>{item.id}</>,
           <>
             {item.senderDepartment.name} {'->'} {item.receiverDepartment.name}
           </>,
-          <>{item.id}</>,
+          <>{item.currentPlace?.name || '-'}</>,
           <div className="flex justify-center items-center gap-2">
             <Button onClick={() => navigate(`/invoice/${item.id}`)}>
               Show

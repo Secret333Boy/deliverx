@@ -126,7 +126,7 @@ export class InvoiceEventProcessor implements FlowEventProcessor {
     queryRunner: QueryRunner,
   ) {
     if (!journey) throw new Error(this.JOURNEY_NOT_FOUND_EXCEPTION_MESSAGE);
-    if (invoice.currentPlace.id !== journey.transition.sourcePlaceId)
+    if (invoice.currentPlace?.id !== journey.transition.sourcePlaceId)
       throw new Error('Not in source node of journey');
 
     await queryRunner.manager.save(Invoice, {
